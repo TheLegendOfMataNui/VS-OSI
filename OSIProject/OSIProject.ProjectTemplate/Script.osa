@@ -1,0 +1,35 @@
+﻿begin metadata
+	version 4, 1
+end ; metadata
+
+begin strings
+	string "hello!"
+end ; strings
+
+begin globals
+	global "stuff"
+end ; globals
+
+begin symbols
+	symbol "id"
+end ; symbols
+
+begin sources
+	source ""
+end ; sources
+
+begin functions
+	function "donothing", 0, 0
+end ; functions
+
+begin classes
+	begin class "test_class" ; 0
+		property "test_property"
+		method "test_method", 0
+	end ; class
+end ; classes
+
+begin subroutine 0
+	PushNothing
+	Return
+end ; subroutine
