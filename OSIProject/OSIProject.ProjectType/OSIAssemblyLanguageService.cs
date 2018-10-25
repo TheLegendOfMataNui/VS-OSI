@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Text.Outlining;
 using Microsoft.VisualStudio.Text;
 using OSIProject.Language.OSIAssembly;
+using Microsoft.VisualStudio.Language.StandardClassification;
 
 namespace OSIProject
 {
@@ -27,6 +28,159 @@ namespace OSIProject
         internal static FileExtensionToContentTypeDefinition OSIAsmExtensionToContentType;
 
         [Export(typeof(ITaggerProvider))]
+        [TagType(typeof(IClassificationTag))]
+        [ContentType("osiasm")]
+        internal sealed class ColoringTaggerProvider : ITaggerProvider
+        {
+            [Import]
+            internal IClassificationTypeRegistryService ClassificationRegistry { get; set; }
+
+            [Import]
+            internal IStandardClassificationService StandardClassifications { get; set; }
+
+            public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
+            {
+                Func<ITagger<T>> sc = delegate () { return new ColoringTagger(buffer, ClassificationRegistry, StandardClassifications) as ITagger<T>; };
+                return buffer.Properties.GetOrCreateSingletonProperty(sc);
+            }
+        }
+
+        internal sealed class ColoringTagger : ITagger<IClassificationTag>
+        {
+            private ITextBuffer Buffer { get; }
+            private ITextSnapshot Snapshot { get; set; }
+            private IClassificationTypeRegistryService ClassificationRegistry { get; }
+            private IStandardClassificationService StandardClassifications { get; }
+
+            private Dictionary<int, List<Token>> Lines = new Dictionary<int, List<Token>>();
+
+            public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
+
+            public ColoringTagger(ITextBuffer buffer, IClassificationTypeRegistryService classificationRegistry, IStandardClassificationService standardClassifications)
+            {
+                this.Buffer = buffer;
+                this.Snapshot = this.Buffer.CurrentSnapshot;
+                this.ClassificationRegistry = classificationRegistry;
+                this.StandardClassifications = standardClassifications;
+                this.Buffer.Changed += Buffer_Changed;
+                //Parse(0, Snapshot.LineCount - 1);
+            }
+
+            private void Buffer_Changed(object sender, TextContentChangedEventArgs e)
+            {
+                List<Tuple<int, int>> parseZones = new List<Tuple<int, int>>();
+                foreach (ITextChange change in e.Changes)
+                {
+                    int startLineOld = e.Before.GetLineNumberFromPosition(change.OldPosition);
+                    int endLineOld = e.Before.GetLineNumberFromPosition(change.OldEnd);
+                    int endLineNew = e.After.GetLineNumberFromPosition(change.NewEnd);
+                    int lineLengthChange = endLineNew - endLineOld;
+                    
+                    // Relocate the lines after endLineOld by lineLengthChange
+                    if (lineLengthChange > 0)
+                    {
+                        // Shift towards the end, starting at the end and going backwards
+                        for (int oldLineIndex = endLineOld; oldLineIndex >= startLineOld; oldLineIndex--)
+                        {
+                            if (Lines.ContainsKey(oldLineIndex + lineLengthChange))
+                                Lines.Remove(oldLineIndex + lineLengthChange);
+                            Lines.Add(oldLineIndex + lineLengthChange, Lines[oldLineIndex]);
+                        }
+                    }
+                    else if (lineLengthChange < 0)
+                    {
+                        // Shift towards the beginning, starting at the beginning and going forwards
+                        for (int oldLineIndex = startLineOld; oldLineIndex <= endLineOld; oldLineIndex++)
+                        {
+                            if (Lines.ContainsKey(oldLineIndex + lineLengthChange))
+                                Lines.Remove(oldLineIndex + lineLengthChange);
+                            Lines.Add(oldLineIndex + lineLengthChange, Lines[oldLineIndex]);
+                        }
+                    }
+
+                    // Re-parse the lines from startLineOld to endLineNew
+                    parseZones.Add(new Tuple<int, int>(startLineOld, endLineNew));
+                }
+                Snapshot = e.After;
+                foreach (Tuple<int, int> zone in parseZones)
+                {
+                    Parse(zone.Item1, zone.Item2);
+                }
+            }
+
+            private void Parse(int startLine, int endLine)
+            {
+                for (int l = startLine; l <= endLine; l++)
+                {
+                    // Clear or add the given lines
+                    if (Lines.ContainsKey(l))
+                        Lines.Remove(l);
+
+                    // Parse the given lines and store the result
+                    ITextSnapshotLine line = Snapshot.GetLineFromLineNumber(l);
+                    string lineText = line.GetText();
+                    List<Token> tokens = Lexer.Lex(lineText, true);
+                    List<Token> adjustedTokens = new List<Token>();
+                    foreach (Token t in tokens)
+                    {
+                        //t.StartIndex += line.Start.Position;
+                        adjustedTokens.Add(new Token(t.Content, t.Type, t.StartIndex + line.Start.Position, t.Length));
+                    }
+
+                    Lines.Add(l, adjustedTokens);
+                }
+
+
+                int start = Snapshot.GetLineFromLineNumber(startLine).Start.Position;
+                int end = Snapshot.GetLineFromLineNumber(endLine).End.Position;
+                TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(Snapshot, new Span(start, end - start))));
+            }
+
+            private IClassificationTag ClassifyToken(Token t)
+            {
+                IClassificationType classification = this.StandardClassifications.Keyword;
+                if (t.Type == Token.TokenType.Comment)
+                    classification = StandardClassifications.Comment;
+                else if (t.Type == Token.TokenType.StringLiteral)
+                    classification = StandardClassifications.StringLiteral;
+                else if (t.Type == Token.TokenType.Whitespace)
+                    classification = StandardClassifications.WhiteSpace;
+                else if (t.Type == Token.TokenType.Comma)
+                    classification = StandardClassifications.Other;
+                else if (t.Type == Token.TokenType.IntegerLiteral)
+                    classification = StandardClassifications.NumberLiteral;
+
+                return new ClassificationTag(classification);
+            }
+
+            public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+            {
+                foreach (SnapshotSpan span in spans)
+                {
+                    for (int line = span.Snapshot.GetLineNumberFromPosition(span.Start.Position); line <= span.Snapshot.GetLineNumberFromPosition(span.End.Position); line++) 
+                    {
+                        if (!Lines.ContainsKey(line))
+                        {
+                            Parse(line, line);
+                        }
+                        /*if (Lines.ContainsKey(line))
+                        {*/
+                            foreach (Token t in Lines[line])
+                            {
+                                yield return new TagSpan<IClassificationTag>(new SnapshotSpan(span.Snapshot, t.StartIndex, t.Length), ClassifyToken(t));
+                            }
+                        /*}
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("OH NO!!!");
+                            System.Diagnostics.Debugger.Break();
+                        }*/
+                    }
+                }
+            }
+        }
+
+        [Export(typeof(ITaggerProvider))]
         [TagType(typeof(IOutliningRegionTag))]
         [ContentType("osiasm")]
         internal sealed class OutliningTaggerProvider : ITaggerProvider
@@ -34,7 +188,7 @@ namespace OSIProject
             public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
             {
                 Func<ITagger<T>> sc = delegate () { return new OutliningTagger(buffer) as ITagger<T>; };
-                return buffer.Properties.GetOrCreateSingletonProperty<ITagger<T>>(sc);
+                return buffer.Properties.GetOrCreateSingletonProperty(sc);
             }
         }
 
@@ -57,7 +211,6 @@ namespace OSIProject
             private ITextBuffer Buffer;
             private ITextSnapshot Snapshot;
 
-            private List<Token> Tokens = null;
             private List<FoldRegion> Regions = new List<FoldRegion>();
 
             public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
@@ -78,6 +231,7 @@ namespace OSIProject
 
             private void Parse(Span span)
             {
+                List<Token> Tokens = null;
                 Tokens = Lexer.Lex(Snapshot.GetText(span));
                 //Spans.Clear();
 
