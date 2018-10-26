@@ -103,7 +103,7 @@ begin strings
             if (results.Count != 1)
                 return false;
 
-            return results[0].Type == Token.TokenType.NumberLiteral && results[0].Content == input;
+            return results[0].Type == TokenType.NumberLiteral && results[0].Content == input;
         }
 
         private bool VerifyTokens(List<Token> results, List<Token> reference)

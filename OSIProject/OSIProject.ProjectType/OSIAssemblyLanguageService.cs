@@ -11,6 +11,15 @@ using Microsoft.VisualStudio.Text.Outlining;
 using Microsoft.VisualStudio.Text;
 using OSIProject.Language.OSIAssembly;
 using Microsoft.VisualStudio.Language.StandardClassification;
+using Microsoft.VisualStudio.Language.Intellisense;
+using Microsoft.VisualStudio.Text.Operations;
+using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.TextManager.Interop;
+using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio;
+using System.Runtime.InteropServices;
 
 namespace OSIProject
 {
@@ -47,9 +56,6 @@ namespace OSIProject
 
         internal sealed class ColoringTagger : ITagger<IClassificationTag>
         {
-            private static readonly string[] BlueKeywords = new string[] { "begin", "end" };
-            private static readonly string[] BlockKeywords = new string[] { "metadata", "strings", "globals", "symbols", "sources", "functions", "classes", "class", "subroutine" };
-
             private ITextBuffer Buffer { get; }
             private ITextSnapshot Snapshot { get; set; }
             private IClassificationTypeRegistryService ClassificationRegistry { get; }
@@ -105,21 +111,21 @@ namespace OSIProject
             private IClassificationTag ClassifyToken(Token t)
             {
                 IClassificationType classification = this.StandardClassifications.ExcludedCode;
-                if (t.Type == Token.TokenType.Comment)
+                if (t.Type == TokenType.Comment)
                     classification = StandardClassifications.Comment;
-                else if (t.Type == Token.TokenType.StringLiteral)
+                else if (t.Type == TokenType.StringLiteral)
                     classification = StandardClassifications.StringLiteral;
-                else if (t.Type == Token.TokenType.Whitespace)
+                else if (t.Type == TokenType.Whitespace)
                     classification = StandardClassifications.WhiteSpace;
-                else if (t.Type == Token.TokenType.Comma)
+                else if (t.Type == TokenType.Comma)
                     classification = StandardClassifications.Other;
-                else if (t.Type == Token.TokenType.NumberLiteral)
+                else if (t.Type == TokenType.NumberLiteral)
                     classification = StandardClassifications.NumberLiteral;
-                else if (t.Type == Token.TokenType.Keyword)
+                else if (t.Type == TokenType.Keyword)
                 {
-                    if (BlueKeywords.Contains(t.Content))
+                    if (Language.OSIAssembly.Language.BlueKeywords.Contains(t.Content))
                         classification = StandardClassifications.Keyword;
-                    else if (BlockKeywords.Contains(t.Content))
+                    else if (Language.OSIAssembly.Language.BlockKeywords.Contains(t.Content))
                         classification = StandardClassifications.Keyword; // no symbolreference
                     else
                         classification = StandardClassifications.Identifier;
@@ -228,10 +234,10 @@ namespace OSIProject
                 int startIndex = 0;
                 while (t < Tokens.Count)
                 {
-                    if (Tokens[t].Type == Token.TokenType.Keyword && Tokens[t].Content == "begin")
+                    if (Tokens[t].Type == TokenType.Keyword && Tokens[t].Content == "begin")
                     {
                         startIndex = Tokens[t].StartIndex;
-                        while (Tokens[t].Type != Token.TokenType.Keyword || Tokens[t].Content != "end")
+                        while (Tokens[t].Type != TokenType.Keyword || Tokens[t].Content != "end")
                         {
                             t++;
                         }
@@ -246,7 +252,7 @@ namespace OSIProject
                 while (t < Tokens.Count)
                 {
                     Token token = Tokens[t];
-                    if (token.Type == Token.TokenType.Keyword)
+                    if (token.Type == TokenType.Keyword)
                     {
                         if (token.Content == "begin")
                         {
@@ -255,7 +261,7 @@ namespace OSIProject
                             {
                                 Token blockType = Tokens[t + 1];
                                 newRegion.CollapsedText = blockType.Content;
-                                if (blockType.Type == Token.TokenType.Keyword && t < Tokens.Count - 2)
+                                if (blockType.Type == TokenType.Keyword && t < Tokens.Count - 2)
                                 {
                                     if (blockType.Content == "class")
                                     {
@@ -358,7 +364,7 @@ namespace OSIProject
                     {
                         string lineText = Snapshot.GetLineFromLineNumber(line).GetText();
                         List<Token> lineTokens = Lexer.Lex(lineText);
-                        if (lineTokens.Count > 0 && lineTokens[0].Type == Token.TokenType.Keyword && lineTokens[0].Content == "end")
+                        if (lineTokens.Count > 0 && lineTokens[0].Type == TokenType.Keyword && lineTokens[0].Content == "end")
                         {
                             if (lineTokens[0].Content == "end")
                             {
@@ -369,7 +375,7 @@ namespace OSIProject
                                 {
                                     string startLineText = Snapshot.GetLineFromLineNumber(startLine).GetText();
                                     List<Token> startLineTokens = Lexer.Lex(startLineText);
-                                    if (startLineTokens.Count > 0 && startLineTokens[0].Type == Token.TokenType.Keyword)
+                                    if (startLineTokens.Count > 0 && startLineTokens[0].Type == TokenType.Keyword)
                                     {
                                         if (startLineTokens[0].Content == "end")
                                         {
@@ -397,7 +403,7 @@ namespace OSIProject
                                 {
                                     string endLineText = Snapshot.GetLineFromLineNumber(endLine).GetText();
                                     List<Token> endLineTokens = Lexer.Lex(endLineText);
-                                    if (endLineTokens.Count > 0 && endLineTokens[0].Type == Token.TokenType.Keyword)
+                                    if (endLineTokens.Count > 0 && endLineTokens[0].Type == TokenType.Keyword)
                                     {
                                         if (endLineTokens[0].Content == "begin")
                                         {
@@ -422,9 +428,280 @@ namespace OSIProject
                     //Parse(change.NewSpan);
                 }
 
+                // Make sure we don't invalidate past the end of the file (can be caused by killing fold regions that were where we would now consider out of bounds)
+                if (invalidateRange.End > Snapshot.Length)
+                {
+                    invalidateRange = new Span(invalidateRange.Start, Snapshot.Length - invalidateRange.Start);
+                }
+
                 Parse(invalidateRange);
             }
 
+        }
+
+        [Export(typeof(ICompletionSourceProvider))]
+        [ContentType("osiasm")]
+        [Name("OSI Assembly Token Completion")]
+        internal sealed class CompletionSourceProvider : ICompletionSourceProvider
+        {
+            [Import]
+            internal ITextStructureNavigatorSelectorService NavigatorService { get; set; }
+
+            public ICompletionSource TryCreateCompletionSource(ITextBuffer textBuffer)
+            {
+                return new CompletionSource(this, textBuffer);
+            }
+        }
+
+        internal sealed class CompletionSource : ICompletionSource
+        {
+            private CompletionSourceProvider SourceProvider;
+            private ITextBuffer Buffer;
+
+            private List<Completion> keywordCompletions = new List<Completion>();
+            private List<Completion> blockCompletions = new List<Completion>();
+
+            public CompletionSource(CompletionSourceProvider sourceProvider, ITextBuffer buffer)
+            {
+                SourceProvider = sourceProvider;
+                Buffer = buffer;
+
+                foreach (string s in Language.OSIAssembly.Language.BlueKeywords)
+                {
+                    keywordCompletions.Add(new Completion(s, s, s + " Keyword", null, null));
+                }
+                keywordCompletions.Sort(new Comparison<Completion>((c1, c2) => c1.DisplayText.CompareTo(c2.DisplayText)));
+                foreach (string s in Language.OSIAssembly.Language.BlockKeywords)
+                {
+                    blockCompletions.Add(new Completion(s, s, s + " Block", null, null));
+                }
+                blockCompletions.Sort(new Comparison<Completion>((c1, c2) => c1.DisplayText.CompareTo(c2.DisplayText)));
+            }
+
+            private ITrackingSpan FindTokenSpanAtPosition(ITrackingPoint point, ICompletionSession session)
+            {
+                SnapshotPoint currentPoint = (session.TextView.Caret.Position.BufferPosition) - 1;
+                ITextStructureNavigator navigator = SourceProvider.NavigatorService.GetTextStructureNavigator(Buffer);
+                TextExtent extent = navigator.GetExtentOfWord(currentPoint);
+                SnapshotSpan span;
+                if (extent.IsSignificant)
+                {
+                    span = extent.Span;
+                }
+                else
+                {
+                    span = new SnapshotSpan(session.TextView.TextBuffer.CurrentSnapshot, currentPoint + 1, 0);
+                }
+                return currentPoint.Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeInclusive);
+            }
+
+            public void AugmentCompletionSession(ICompletionSession session, IList<CompletionSet> completionSets)
+            {
+                int triggerPosition = session.GetTriggerPoint(Buffer).GetPosition(Buffer.CurrentSnapshot);
+                ITextSnapshotLine line = Buffer.CurrentSnapshot.GetLineFromPosition(triggerPosition);
+                List<Token> lineTokens = Lexer.Lex(line.GetText());
+                int currentTokenIndex = -1;
+                Token previousToken = null; // The rightmost token whose start index is to the left of the trigger position.
+                for (int i = 0; i < lineTokens.Count; i++)
+                {
+                    if (lineTokens[i].StartIndex <= triggerPosition - line.Start.Position && lineTokens[i].StartIndex + lineTokens[i].Length >= triggerPosition - line.Start.Position)
+                    {
+                        currentTokenIndex = i;
+                        //break;
+                    }
+                    if (lineTokens[i].StartIndex < triggerPosition - line.Start.Position)
+                    {
+                        previousToken = lineTokens[i];
+                    }
+                }
+                //List<string> keywords = new List<string>(OSIProject.Language.OSIAssembly.Language.BlueKeywords);
+                //List<string> blocks = new List<string>(Language.OSIAssembly.Language.BlockKeywords);
+
+                ITrackingSpan span = FindTokenSpanAtPosition(session.GetTriggerPoint(Buffer), session);
+                //completionSets.Add(new CompletionSet("Keywords", "Keywords", span, keywordCompletions, null));
+                //completionSets.Add(new CompletionSet("Blocks", "Blocks", span, blockCompletions, null));
+
+                if (lineTokens.Count == 0 || currentTokenIndex == 0) // No tokens yet or working on the first
+                {
+                    completionSets.Add(new CompletionSet("Keywords", "Keywords", span, keywordCompletions, null));
+                }
+                else if (lineTokens.Count > 0 && 
+                    ((previousToken != null && previousToken.Type == TokenType.Keyword && previousToken.Content == "begin")
+                        || previousToken == lineTokens[currentTokenIndex] && currentTokenIndex > 0 && lineTokens[currentTokenIndex - 1].Type == TokenType.Keyword && lineTokens[currentTokenIndex - 1].Content == "begin"))
+                {
+                    completionSets.Add(new CompletionSet("Blocks", "Blocks", span, blockCompletions, null));
+                }
+            }
+
+            private bool IsDisposed;
+            public void Dispose()
+            {
+                if (!IsDisposed)
+                {
+                    GC.SuppressFinalize(this);
+                    IsDisposed = true;
+                }
+            }
+        }
+
+        [Export(typeof(IVsTextViewCreationListener))]
+        [ContentType("osiasm")]
+        [TextViewRole(PredefinedTextViewRoles.Editable)]
+        [Name("OSI Assembly Token Completion Handler")]
+        internal sealed class CompletionHandlerProvider : IVsTextViewCreationListener
+        {
+            [Import]
+            internal IVsEditorAdaptersFactoryService AdapterService { get; set; }
+            [Import]
+            internal ICompletionBroker CompletionBroker { get; set; }
+            [Import]
+            internal SVsServiceProvider ServiceProvider { get; set; }
+
+            public void VsTextViewCreated(IVsTextView textViewAdapter)
+            {
+                ITextView textView = AdapterService.GetWpfTextView(textViewAdapter);
+                if (textView == null)
+                    return;
+
+                Func<CompletionCommandHandler> createCommandHandler = delegate () { return new CompletionCommandHandler(textViewAdapter, textView, this); };
+                textView.Properties.GetOrCreateSingletonProperty(createCommandHandler);
+            }
+        }
+
+        internal sealed class CompletionCommandHandler : IOleCommandTarget
+        {
+            private IOleCommandTarget NextCommandHandler;
+            private ITextView TextView;
+            private CompletionHandlerProvider Provider;
+            private ICompletionSession Session;
+
+            internal CompletionCommandHandler(IVsTextView textViewAdapter, ITextView textView, CompletionHandlerProvider provider)
+            {
+                this.TextView = textView;
+                this.Provider = provider;
+                textViewAdapter.AddCommandFilter(this, out NextCommandHandler);
+            }
+
+            public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
+            {
+                return NextCommandHandler.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
+            }
+
+            public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
+            {
+                if (VsShellUtilities.IsInAutomationFunction(Provider.ServiceProvider))
+                {
+                    return NextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+                }
+                //make a copy of this so we can look at it after forwarding some commands
+                uint commandID = nCmdID;
+                char typedChar = char.MinValue;
+                //make sure the input is a char before getting it
+                if (pguidCmdGroup == VSConstants.VSStd2K && nCmdID == (uint)VSConstants.VSStd2KCmdID.TYPECHAR)
+                {
+                    typedChar = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
+                }
+
+                //check for a commit character
+                if (nCmdID == (uint)VSConstants.VSStd2KCmdID.RETURN
+                    || nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB
+                    || (char.IsWhiteSpace(typedChar) || char.IsPunctuation(typedChar)))
+                {
+                    //check for a selection
+                    if (Session != null && !Session.IsDismissed)
+                    {
+                        //if the selection is fully selected, commit the current session
+                        if (Session.SelectedCompletionSet.SelectionStatus.IsSelected)
+                        {
+                            Session.Commit();
+                            // also, don't add the character to the buffer on Tab
+                            if (nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB)
+                            {
+                                return VSConstants.S_OK;
+                            }
+                        }
+                        else
+                        {
+                            //if there is no selection, dismiss the session
+                            Session.Dismiss();
+                        }
+                    }
+                }
+
+                //pass along the command so the char is added to the buffer
+                int retVal = NextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+                bool handled = false;
+                if (!typedChar.Equals(char.MinValue) && char.IsLetterOrDigit(typedChar))
+                {
+                    if (Session == null || Session.IsDismissed) // If there is no active session, bring up completion
+                    {
+                        this.TriggerCompletion();
+                        if (Session != null) // Session could be null if the completion has no suggestions.
+                            Session.Filter();
+                    }
+                    else    //the completion session is already active, so just filter
+                    {
+                        string typedText = Session.CompletionSets[0].ApplicableTo.GetText(Session.TextView.TextSnapshot);
+                        Session.Filter();
+                    }
+                    handled = true;
+                }
+                else if (Session == null && typedChar == ' ') // show help after 'begin' (and TODO: after instructions)
+                {
+                    int triggerPosition = TextView.Caret.Position.BufferPosition.Position;
+                    ITextSnapshotLine line = TextView.TextBuffer.CurrentSnapshot.GetLineFromPosition(triggerPosition);
+                    List<Token> lineTokens = Lexer.Lex(line.GetText());
+                    Token lastTokenBeforeCaret = null;
+                    foreach (Token t in lineTokens)
+                    {
+                        if (t.StartIndex + t.Length <= triggerPosition - line.Start.Position)
+                            lastTokenBeforeCaret = t;
+                        else
+                            break;
+                    }
+
+                    if (lastTokenBeforeCaret != null && lastTokenBeforeCaret.Type == TokenType.Keyword && lastTokenBeforeCaret.Content == "begin")
+                        TriggerCompletion();
+
+                }
+                else if (commandID == (uint)VSConstants.VSStd2KCmdID.BACKSPACE   //redo the filter if there is a deletion
+                    || commandID == (uint)VSConstants.VSStd2KCmdID.DELETE)
+                {
+                    if (Session != null && !Session.IsDismissed)
+                        Session.Filter();
+                    handled = true;
+                }
+                if (handled) return VSConstants.S_OK;
+                return retVal;
+            }
+
+            private bool TriggerCompletion()
+            {
+                //the caret must be in a non-projection location 
+                SnapshotPoint? caretPoint =
+                TextView.Caret.Position.Point.GetPoint(
+                textBuffer => (!textBuffer.ContentType.IsOfType("projection")), PositionAffinity.Predecessor);
+                if (!caretPoint.HasValue)
+                {
+                    return false;
+                }
+
+                Session = Provider.CompletionBroker.CreateCompletionSession(TextView,
+                    caretPoint.Value.Snapshot.CreateTrackingPoint(caretPoint.Value.Position, PointTrackingMode.Positive),
+                    true);
+
+                //subscribe to the Dismissed event on the session 
+                Session.Dismissed += Session_Dismissed;
+                Session.Start();
+
+                return true;
+            }
+
+            private void Session_Dismissed(object sender, EventArgs e)
+            {
+                Session.Dismissed -= this.Session_Dismissed;
+                Session = null;
+            }
         }
 
         /// <summary>
