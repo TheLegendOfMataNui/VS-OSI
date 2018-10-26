@@ -47,12 +47,15 @@ namespace OSIProject
 
         internal sealed class ColoringTagger : ITagger<IClassificationTag>
         {
+            private static readonly string[] BlueKeywords = new string[] { "begin", "end" };
+            private static readonly string[] BlockKeywords = new string[] { "metadata", "strings", "globals", "symbols", "sources", "functions", "classes", "class", "subroutine" };
+
             private ITextBuffer Buffer { get; }
             private ITextSnapshot Snapshot { get; set; }
             private IClassificationTypeRegistryService ClassificationRegistry { get; }
             private IStandardClassificationService StandardClassifications { get; }
 
-            private Dictionary<int, List<Token>> Lines = new Dictionary<int, List<Token>>();
+            //private Dictionary<int, List<Token>> Lines = new Dictionary<int, List<Token>>(); // The token start indexes are relative to the beginning of that line!!!
 
             public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
@@ -68,47 +71,17 @@ namespace OSIProject
 
             private void Buffer_Changed(object sender, TextContentChangedEventArgs e)
             {
-                List<Tuple<int, int>> parseZones = new List<Tuple<int, int>>();
+                Span s = e.Changes[0].NewSpan;
                 foreach (ITextChange change in e.Changes)
                 {
-                    int startLineOld = e.Before.GetLineNumberFromPosition(change.OldPosition);
-                    int endLineOld = e.Before.GetLineNumberFromPosition(change.OldEnd);
-                    int endLineNew = e.After.GetLineNumberFromPosition(change.NewEnd);
-                    int lineLengthChange = endLineNew - endLineOld;
-                    
-                    // Relocate the lines after endLineOld by lineLengthChange
-                    if (lineLengthChange > 0)
-                    {
-                        // Shift towards the end, starting at the end and going backwards
-                        for (int oldLineIndex = endLineOld; oldLineIndex >= startLineOld; oldLineIndex--)
-                        {
-                            if (Lines.ContainsKey(oldLineIndex + lineLengthChange))
-                                Lines.Remove(oldLineIndex + lineLengthChange);
-                            Lines.Add(oldLineIndex + lineLengthChange, Lines[oldLineIndex]);
-                        }
-                    }
-                    else if (lineLengthChange < 0)
-                    {
-                        // Shift towards the beginning, starting at the beginning and going forwards
-                        for (int oldLineIndex = startLineOld; oldLineIndex <= endLineOld; oldLineIndex++)
-                        {
-                            if (Lines.ContainsKey(oldLineIndex + lineLengthChange))
-                                Lines.Remove(oldLineIndex + lineLengthChange);
-                            Lines.Add(oldLineIndex + lineLengthChange, Lines[oldLineIndex]);
-                        }
-                    }
-
-                    // Re-parse the lines from startLineOld to endLineNew
-                    parseZones.Add(new Tuple<int, int>(startLineOld, endLineNew));
+                    s = s.Union(change.NewSpan);
                 }
                 Snapshot = e.After;
-                foreach (Tuple<int, int> zone in parseZones)
-                {
-                    Parse(zone.Item1, zone.Item2);
-                }
+
+                TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(Snapshot, s)));
             }
 
-            private void Parse(int startLine, int endLine)
+            /*private void Parse(int startLine, int endLine)
             {
                 for (int l = startLine; l <= endLine; l++)
                 {
@@ -120,25 +93,18 @@ namespace OSIProject
                     ITextSnapshotLine line = Snapshot.GetLineFromLineNumber(l);
                     string lineText = line.GetText();
                     List<Token> tokens = Lexer.Lex(lineText, true);
-                    List<Token> adjustedTokens = new List<Token>();
-                    foreach (Token t in tokens)
-                    {
-                        //t.StartIndex += line.Start.Position;
-                        adjustedTokens.Add(new Token(t.Content, t.Type, t.StartIndex + line.Start.Position, t.Length));
-                    }
-
-                    Lines.Add(l, adjustedTokens);
+                    Lines.Add(l, tokens);
                 }
 
 
                 int start = Snapshot.GetLineFromLineNumber(startLine).Start.Position;
                 int end = Snapshot.GetLineFromLineNumber(endLine).End.Position;
                 TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(Snapshot, new Span(start, end - start))));
-            }
+            }*/
 
             private IClassificationTag ClassifyToken(Token t)
             {
-                IClassificationType classification = this.StandardClassifications.Keyword;
+                IClassificationType classification = this.StandardClassifications.ExcludedCode;
                 if (t.Type == Token.TokenType.Comment)
                     classification = StandardClassifications.Comment;
                 else if (t.Type == Token.TokenType.StringLiteral)
@@ -147,15 +113,24 @@ namespace OSIProject
                     classification = StandardClassifications.WhiteSpace;
                 else if (t.Type == Token.TokenType.Comma)
                     classification = StandardClassifications.Other;
-                else if (t.Type == Token.TokenType.IntegerLiteral)
+                else if (t.Type == Token.TokenType.NumberLiteral)
                     classification = StandardClassifications.NumberLiteral;
+                else if (t.Type == Token.TokenType.Keyword)
+                {
+                    if (BlueKeywords.Contains(t.Content))
+                        classification = StandardClassifications.Keyword;
+                    else if (BlockKeywords.Contains(t.Content))
+                        classification = StandardClassifications.Keyword; // no symbolreference
+                    else
+                        classification = StandardClassifications.Identifier;
+                }
 
                 return new ClassificationTag(classification);
             }
 
             public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans)
             {
-                foreach (SnapshotSpan span in spans)
+                /*foreach (SnapshotSpan span in spans)
                 {
                     for (int line = span.Snapshot.GetLineNumberFromPosition(span.Start.Position); line <= span.Snapshot.GetLineNumberFromPosition(span.End.Position); line++) 
                     {
@@ -163,18 +138,24 @@ namespace OSIProject
                         {
                             Parse(line, line);
                         }
-                        /*if (Lines.ContainsKey(line))
-                        {*/
-                            foreach (Token t in Lines[line])
-                            {
-                                yield return new TagSpan<IClassificationTag>(new SnapshotSpan(span.Snapshot, t.StartIndex, t.Length), ClassifyToken(t));
-                            }
-                        /*}
-                        else
+
+                        foreach (Token t in Lines[line])
                         {
-                            System.Diagnostics.Debug.WriteLine("OH NO!!!");
-                            System.Diagnostics.Debugger.Break();
-                        }*/
+                            yield return new TagSpan<IClassificationTag>(new SnapshotSpan(span.Snapshot, t.StartIndex + span.Snapshot.GetLineFromLineNumber(line).Start.Position, t.Length), ClassifyToken(t));
+                        }
+                    }
+                }*/
+
+                foreach (SnapshotSpan span in spans)
+                {
+                    for (int line = span.Snapshot.GetLineNumberFromPosition(span.Start.Position); line <= span.Snapshot.GetLineNumberFromPosition(span.End.Position); line++)
+                    {
+                        ITextSnapshotLine l = span.Snapshot.GetLineFromLineNumber(line);
+                        List<Token> tokens = Lexer.Lex(l.GetText(), true);
+                        foreach (Token t in tokens)
+                        {
+                            yield return new TagSpan<IClassificationTag>(new SnapshotSpan(span.Snapshot, l.Start.Position + t.StartIndex, t.Length), ClassifyToken(t));
+                        }
                     }
                 }
             }
