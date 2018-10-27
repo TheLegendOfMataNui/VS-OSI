@@ -10,6 +10,171 @@ namespace OSIProject.Language.OSIAssembly
     {
         public static readonly string[] BlueKeywords = new string[] { "begin", "end" };
         public static readonly string[] BlockKeywords = new string[] { "metadata", "strings", "globals", "symbols", "sources", "functions", "classes", "class", "subroutine" };
+        public static readonly string[] MetadataKeywords = new string[] { "version" };
+        public static readonly string[] StringsKeywords = new string[] { "string" };
+        public static readonly string[] GlobalsKeywords = new string[] { "global" };
+        public static readonly string[] SymbolsKeywords = new string[] { "symbol" };
+        public static readonly string[] SourcesKeywords = new string[] { "source" };
+        public static readonly string[] FunctionsKeywords = new string[] { "function" };
+        public static readonly string[] ClassesKeywords = new string[] { "begin", "end" };
+        public static readonly string[] ClassKeywords = new string[] { "property", "method" };
+        public static readonly string[] SubroutineKeywords = new string[]
+        {
+            "JumpTarget",
+            "PushConstanti32JumpTarget",
+            "BranchTarget",
+            "BranchAlwaysTarget",
+            "CompareAndBranchIfFalseTarget",
+            "PushConstantStringString",
+            "GetThisMemberFunctionString",
+            "GetThisMemberValueString",
+            "SetThisMemberValueString",
+            "GetMemberFunctionString",
+            "GetMemberValueString",
+            "SetMemberValueString",
+            "GetGameVariableString",
+            "SetGameVariableString",
+            "CallGameFunctionString",
+            "CallGameFunctionFromStringString",
+            "Nop",
+            "DebugOn",
+            "DebugOff",
+            "LineNumber",
+            "LineNumberAlt1",
+            "LineNumberAlt2",
+            "SetMemberValue",
+            "GetMemberValue",
+            "GetMemberFunction",
+            "CreateObject",
+            "MemberFunctionArgumentCheck",
+            "SetThisMemberValue",
+            "GetThisMemberValue",
+            "GetThisMemberFunction",
+            "GetMemberValueFromString",
+            "GetMemberFunctionFromString",
+            "SetMemberValueFromString",
+            "GetVariableValue",
+            "SetVariableValue",
+            "CreateStackVariables",
+            "IncrementVariable",
+            "DecrementVariable",
+            "Pop",
+            "PopN",
+            "Swap",
+            "Pull",
+            "DupN",
+            "Dup",
+            "PushConstanti32",
+            "PushConstanti24",
+            "PushConstanti16",
+            "PushConstanti8",
+            "PushConstantf32",
+            "PushConstant0",
+            "PushConstantString",
+            "PushNothing",
+            "PushConstantColor8888",
+            "PushConstantColor5551",
+            "JumpRelative",
+            "JumpAbsolute",
+            "Return",
+            "CompareAndBranchIfFalse",
+            "BranchAlways",
+            "EqualTo",
+            "LessThan",
+            "GreaterThan",
+            "LessOrEqual",
+            "GreaterOrEqual",
+            "And",
+            "Or",
+            "Not",
+            "BitwiseAnd",
+            "BitwiseOr",
+            "BitwiseXor",
+            "Add",
+            "Subtract",
+            "Multiply",
+            "Divide",
+            "Power",
+            "Modulus",
+            "BitwiseNot",
+            "ShiftLeft",
+            "ShiftRight",
+            "Increment",
+            "Decrement",
+            "GetGameVariable",
+            "SetGameVariable",
+            "CallGameFunction",
+            "CallGameFunctionFromString",
+            "CallGameFunctionDirect",
+            "CreateArray",
+            "GetArrayValue",
+            "ElementsInArray",
+            "SetArrayValue",
+            "AppendToArray",
+            "RemoveFromArray",
+            "InsertIntoArray",
+            "SetRedValue",
+            "SetGreenValue",
+            "SetBlueValue",
+            "SetAlphaValue",
+            "GetRedValue",
+            "GetGreenValue",
+            "GetBlueValue",
+            "GetAlphaValue",
+            "ConvertToString",
+            "ConvertToFloat",
+            "ConvertToInteger",
+            "IsInteger",
+            "IsFloat",
+            "IsString",
+            "IsAnObject",
+            "IsGameObject",
+            "IsArray",
+            "GetObjectClassID",
+            "Halt",
+
+        };
+
+        private static Dictionary<string, BlockContext> BlockContexts = null;
+        private static BlockContext TopContext = null;
+        public static BlockContext GetBlockContext(string keyword)
+        {
+            if (BlockContexts == null)
+            {
+                BlockContexts = new Dictionary<string, BlockContext>();
+                TopContext = new BlockContext(null, BlueKeywords);
+                BlockContexts.Add("metadata", new BlockContext("metadata", MetadataKeywords));
+                BlockContexts.Add("strings", new BlockContext("strings", StringsKeywords));
+                BlockContexts.Add("globals", new BlockContext("globals", GlobalsKeywords));
+                BlockContexts.Add("symbols", new BlockContext("symbols", SymbolsKeywords));
+                BlockContexts.Add("sources", new BlockContext("sources", SourcesKeywords));
+                BlockContexts.Add("functions", new BlockContext("functions", FunctionsKeywords));
+                BlockContexts.Add("classes", new BlockContext("classes", ClassesKeywords));
+                BlockContexts.Add("class", new BlockContext("class", ClassKeywords));
+                BlockContexts.Add("subroutine", new BlockContext("subroutine", SubroutineKeywords));
+            }
+            if (keyword == null)
+                return TopContext;
+            else if (BlockContexts.ContainsKey(keyword))
+                return BlockContexts[keyword];
+            else
+                return null;
+        }
+    }
+    
+    /// <summary>
+    /// Defines the code hints that apply to the inside of a particular block type.
+    /// </summary>
+    public class BlockContext
+    {
+        public string Keyword { get; }
+        public IEnumerable<string> ValidFirstTokens { get; }
+
+        public BlockContext(string keyword, IEnumerable<string> validFirstTokens)
+        {
+            this.Keyword = keyword;
+            this.ValidFirstTokens = validFirstTokens;
+        }
     }
 
     public enum TokenType

@@ -220,7 +220,6 @@ namespace OSIProject
             {
                 List<Token> Tokens = null;
                 Tokens = Lexer.Lex(Snapshot.GetText(span));
-                //Spans.Clear();
 
                 for (int r = Regions.Count - 1; r >= 0; r--)
                 {
@@ -229,23 +228,6 @@ namespace OSIProject
                         Regions.RemoveAt(r);
                     }
                 }
-
-                /*int t = 0;
-                int startIndex = 0;
-                while (t < Tokens.Count)
-                {
-                    if (Tokens[t].Type == TokenType.Keyword && Tokens[t].Content == "begin")
-                    {
-                        startIndex = Tokens[t].StartIndex;
-                        while (Tokens[t].Type != TokenType.Keyword || Tokens[t].Content != "end")
-                        {
-                            t++;
-                        }
-                        int length = Tokens[t].StartIndex + Tokens[t].Length - startIndex;
-                        Spans.Add(new Tuple<int, int>(startIndex, length));
-                    }
-                    t++;
-                }*/
 
                 int t = 0;
                 Stack<FoldRegion> regions = new Stack<FoldRegion>();
@@ -298,12 +280,6 @@ namespace OSIProject
                 this.TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(Snapshot, span)));
             }
 
-            // Removes any
-            /*private void InvalidateSpan(Span span)
-            {
-
-            }*/
-
             private void Buffer_Changed(object sender, TextContentChangedEventArgs e)
             {
                 if (e.Changes.Count == 0)
@@ -316,10 +292,6 @@ namespace OSIProject
                 foreach (ITextChange change in e.Changes)
                 {
                     // expand invalidateRange to include change.NewSpan
-                    /*if (change.NewPosition < invalidateRange.Start)
-                        invalidateRange = new Span(change.NewPosition, invalidateRange.End - change.NewPosition);
-                    if (change.NewEnd > invalidateRange.End)
-                        invalidateRange = new Span(invalidateRange.Start, change.NewEnd - invalidateRange.Start);*/
                     invalidateRange = invalidateRange.Union(change.NewSpan);
 
                     // - Fix up starts and lengths of spans before/after/around
@@ -424,8 +396,6 @@ namespace OSIProject
                             }
                         }
                     }
-                    //InvalidateChange(change.OldSpan, change.NewSpan);
-                    //Parse(change.NewSpan);
                 }
 
                 // Make sure we don't invalidate past the end of the file (can be caused by killing fold regions that were where we would now consider out of bounds)
@@ -458,7 +428,7 @@ namespace OSIProject
             private CompletionSourceProvider SourceProvider;
             private ITextBuffer Buffer;
 
-            private List<Completion> keywordCompletions = new List<Completion>();
+            //private List<Completion> keywordCompletions = new List<Completion>();
             private List<Completion> blockCompletions = new List<Completion>();
 
             public CompletionSource(CompletionSourceProvider sourceProvider, ITextBuffer buffer)
@@ -466,11 +436,11 @@ namespace OSIProject
                 SourceProvider = sourceProvider;
                 Buffer = buffer;
 
-                foreach (string s in Language.OSIAssembly.Language.BlueKeywords)
+                /*foreach (string s in Language.OSIAssembly.Language.BlueKeywords)
                 {
                     keywordCompletions.Add(new Completion(s, s, s + " Keyword", null, null));
                 }
-                keywordCompletions.Sort(new Comparison<Completion>((c1, c2) => c1.DisplayText.CompareTo(c2.DisplayText)));
+                keywordCompletions.Sort(new Comparison<Completion>((c1, c2) => c1.DisplayText.CompareTo(c2.DisplayText)));*/
                 foreach (string s in Language.OSIAssembly.Language.BlockKeywords)
                 {
                     blockCompletions.Add(new Completion(s, s, s + " Block", null, null));
@@ -507,23 +477,67 @@ namespace OSIProject
                     if (lineTokens[i].StartIndex <= triggerPosition - line.Start.Position && lineTokens[i].StartIndex + lineTokens[i].Length >= triggerPosition - line.Start.Position)
                     {
                         currentTokenIndex = i;
-                        //break;
                     }
                     if (lineTokens[i].StartIndex < triggerPosition - line.Start.Position)
                     {
                         previousToken = lineTokens[i];
                     }
                 }
-                //List<string> keywords = new List<string>(OSIProject.Language.OSIAssembly.Language.BlueKeywords);
-                //List<string> blocks = new List<string>(Language.OSIAssembly.Language.BlockKeywords);
-
                 ITrackingSpan span = FindTokenSpanAtPosition(session.GetTriggerPoint(Buffer), session);
-                //completionSets.Add(new CompletionSet("Keywords", "Keywords", span, keywordCompletions, null));
-                //completionSets.Add(new CompletionSet("Blocks", "Blocks", span, blockCompletions, null));
 
-                if (lineTokens.Count == 0 || currentTokenIndex == 0) // No tokens yet or working on the first
+                if (lineTokens.Count == 0 || currentTokenIndex == 0) // No tokens yet or working on the first: Get from block context
                 {
-                    completionSets.Add(new CompletionSet("Keywords", "Keywords", span, keywordCompletions, null));
+                    // find the containing 'begin' line
+                    List<Token> tokens = null;
+                    int nest = 1; // increase for an 'end', increase for a 'begin', and we have found our target when we hit 'begin' when 'nest' becomes 0
+                    for (int i = line.LineNumber - 1; i >= 0; i--)
+                    {
+                        ITextSnapshotLine prevLine = Buffer.CurrentSnapshot.GetLineFromLineNumber(i);
+                        tokens = Lexer.Lex(prevLine.GetText());
+                        if (tokens.Count > 0)
+                        {
+                            if (tokens[0].Type == TokenType.Keyword)
+                            {
+                                if (tokens[0].Content == "end")
+                                {
+                                    nest++;
+                                }
+                                else if (tokens[0].Content == "begin")
+                                {
+                                    nest--;
+                                    if (nest == 0)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        tokens = null;
+                    }
+
+                    string blockType;
+                    if (tokens != null && tokens.Count > 1)
+                    {
+                        blockType = tokens[1].Content;
+                    }
+                    else if (tokens == null)
+                    {
+                        blockType = null;
+                    }
+                    else
+                    {
+                        return; // No completions for invalid syntax ('begin' without a block type)
+                    }
+
+                    BlockContext context = null;
+                    context = Language.OSIAssembly.Language.GetBlockContext(blockType);
+                    List<Completion> completions = new List<Completion>();
+                    foreach (string s in context.ValidFirstTokens)
+                    {
+                        completions.Add(new Completion(s, s, null, null, null));
+                    }
+
+                    completionSets.Add(new CompletionSet("Keywords", "Keywords", span, completions, null));
                 }
                 else if (lineTokens.Count > 0 && 
                     ((previousToken != null && previousToken.Type == TokenType.Keyword && previousToken.Content == "begin")
