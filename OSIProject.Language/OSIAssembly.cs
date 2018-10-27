@@ -142,14 +142,14 @@ namespace OSIProject.Language.OSIAssembly
             if (BlockContexts == null)
             {
                 BlockContexts = new Dictionary<string, BlockContext>();
-                TopContext = new BlockContext(null, BlueKeywords);
+                TopContext = new BlockContext(null, BlueKeywords, BlockKeywords);
                 BlockContexts.Add("metadata", new BlockContext("metadata", MetadataKeywords));
                 BlockContexts.Add("strings", new BlockContext("strings", StringsKeywords));
                 BlockContexts.Add("globals", new BlockContext("globals", GlobalsKeywords));
                 BlockContexts.Add("symbols", new BlockContext("symbols", SymbolsKeywords));
                 BlockContexts.Add("sources", new BlockContext("sources", SourcesKeywords));
                 BlockContexts.Add("functions", new BlockContext("functions", FunctionsKeywords));
-                BlockContexts.Add("classes", new BlockContext("classes", ClassesKeywords));
+                BlockContexts.Add("classes", new BlockContext("classes", ClassesKeywords, new string[] { "class" }));
                 BlockContexts.Add("class", new BlockContext("class", ClassKeywords));
                 BlockContexts.Add("subroutine", new BlockContext("subroutine", SubroutineKeywords));
             }
@@ -169,11 +169,15 @@ namespace OSIProject.Language.OSIAssembly
     {
         public string Keyword { get; }
         public IEnumerable<string> ValidFirstTokens { get; }
+        public IEnumerable<string> ValidSubBlocks { get; }
 
-        public BlockContext(string keyword, IEnumerable<string> validFirstTokens)
+        public BlockContext(string keyword, IEnumerable<string> validFirstTokens, IEnumerable<string> validSubBlocks = null)
         {
             this.Keyword = keyword;
             this.ValidFirstTokens = validFirstTokens;
+            this.ValidSubBlocks = validSubBlocks;
+            if (this.ValidSubBlocks == null)
+                this.ValidSubBlocks = new List<string>();
         }
     }
 

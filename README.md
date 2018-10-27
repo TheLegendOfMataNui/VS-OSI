@@ -6,7 +6,7 @@ Goals
  - [ ] OSI Assembly language support for `.osa` files
    - [X] Syntax coloring
    - [X] Code folding
-   - [ ] [WIP] Code prediction
+   - [X] Code prediction
    - [ ] Instruction signature help
  - [ ] OSI Projects for compiling OSI Assembly into OSI using [SAGE-JS](https://github.com/TheLegendOfMataNui/sage-js)
    - [X] SAGE-JS MSBuild task (!! installation method needs help: the Project definition requires the path to the embedded `OSIProject.Tasks.dll` to be in the registry before it will work!!)
