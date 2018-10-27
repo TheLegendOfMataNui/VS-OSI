@@ -123,9 +123,9 @@ namespace OSIProject
                     classification = StandardClassifications.NumberLiteral;
                 else if (t.Type == TokenType.Keyword)
                 {
-                    if (Language.OSIAssembly.Language.BlueKeywords.Contains(t.Content))
+                    if (Language.OSIAssembly.Language.BlueKeywords.Any((info) => info.Name == t.Content))
                         classification = StandardClassifications.Keyword;
-                    else if (Language.OSIAssembly.Language.BlockKeywords.Contains(t.Content))
+                    else if (Language.OSIAssembly.Language.BlockKeywords.Any((info) => info.Name == t.Content))
                         classification = StandardClassifications.Keyword; // no symbolreference
                     else
                         classification = StandardClassifications.Identifier;
@@ -489,9 +489,9 @@ namespace OSIProject
                 if (lineTokens.Count == 0 || currentTokenIndex == 0) // No tokens yet or working on the first: Get from block context
                 {
                     List<Completion> completions = new List<Completion>();
-                    foreach (string s in GetEnclosingContext(line.LineNumber).ValidFirstTokens)
+                    foreach (HintInfo h in GetEnclosingContext(line.LineNumber).ValidFirstTokens)
                     {
-                        completions.Add(new Completion(s, s, null, null, null));
+                        completions.Add(new Completion(h.Name, h.Name, h.Description, null, null));
                     }
 
                     completionSets.Add(new CompletionSet("Keywords", "Keywords", span, completions, null));
@@ -501,9 +501,9 @@ namespace OSIProject
                         || previousToken == lineTokens[currentTokenIndex] && currentTokenIndex > 0 && lineTokens[currentTokenIndex - 1].Type == TokenType.Keyword && lineTokens[currentTokenIndex - 1].Content == "begin"))
                 {
                     List<Completion> completions = new List<Completion>();
-                    foreach (string s in GetEnclosingContext(line.LineNumber).ValidSubBlocks)
+                    foreach (HintInfo h in GetEnclosingContext(line.LineNumber).ValidSubBlocks)
                     {
-                        completions.Add(new Completion(s, s, null, null, null));
+                        completions.Add(new Completion(h.Name, h.Name, h.Description, null, null));
                     }
 
                     completionSets.Add(new CompletionSet("Blocks", "Blocks", span, completions, null));

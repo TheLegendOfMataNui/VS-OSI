@@ -8,130 +8,152 @@ namespace OSIProject.Language.OSIAssembly
 {
     public static class Language
     {
-        public static readonly string[] BlueKeywords = new string[] { "begin", "end" };
-        public static readonly string[] BlockKeywords = new string[] { "metadata", "strings", "globals", "symbols", "sources", "functions", "classes", "class", "subroutine" };
-        public static readonly string[] MetadataKeywords = new string[] { "version" };
-        public static readonly string[] StringsKeywords = new string[] { "string" };
-        public static readonly string[] GlobalsKeywords = new string[] { "global" };
-        public static readonly string[] SymbolsKeywords = new string[] { "symbol" };
-        public static readonly string[] SourcesKeywords = new string[] { "source" };
-        public static readonly string[] FunctionsKeywords = new string[] { "function" };
-        public static readonly string[] ClassesKeywords = new string[] { "begin", "end" };
-        public static readonly string[] ClassKeywords = new string[] { "property", "method" };
-        public static readonly string[] SubroutineKeywords = new string[]
+        public static readonly HintInfo BeginHint = new HintInfo("begin", "keyword", "Begins a block of the given type.\nExample: 'begin class'");
+        public static readonly HintInfo EndHint = new HintInfo("end", "keyword", "Ends a block that was begun with the 'begin' keyword.");
+        // Blocks
+        public static readonly HintInfo MetadataHint = new HintInfo("metadata", "blocktype", "Begins a block that has information about the file.");
+        public static readonly HintInfo StringsHint = new HintInfo("strings", "blocktype", "Begins a block that lists all the strings used in the file. They can be referred to later by their index in this block.");
+        public static readonly HintInfo GlobalsHint = new HintInfo("globals", "blocktype", "Begins a block that lists all the global variables used in the file. They can be referred to later by their index in this block.");
+        public static readonly HintInfo SymbolsHint = new HintInfo("symbols", "blocktype", "Begins a block that lists all the symbols (names) used in the file. They can be referred to later by their index in this block.");
+        public static readonly HintInfo SourcesHint = new HintInfo("sources", "blocktyle", "Begins a block that lists all the source filesnames used in the file. They can be referred to later by their index in this block.");
+        public static readonly HintInfo FunctionsHint = new HintInfo("functions", "blocktype", "Begins a block that describes all the functions that this OSI defines.");
+        public static readonly HintInfo ClassesHint = new HintInfo("classes", "blocktype", "Begins a block that defines all the classes that this OSI defines.");
+        public static readonly HintInfo ClassHint = new HintInfo("class", "blocktype", "Begins a block that defines the members (properties and methods) of a class.");
+        public static readonly HintInfo SubroutineHint = new HintInfo("subroutine", "blocktype", "Begins a block that defines the behavior of a method or function.");
+        // Statements
+        public static readonly HintInfo VersionHint = new HintInfo("version", "statement", "Sets the OSI version of the file. \nExample: \version 4, 1'");
+        public static readonly HintInfo StringHint = new HintInfo("string", "statement", "Defines text that can be referenced by its index. \nExample: 'string \"text\"'");
+        public static readonly HintInfo GlobalHint = new HintInfo("global", "statement", "Declares a global variable that can be referenced to be its index. \nExample: 'global \"globalclass\"'");
+        public static readonly HintInfo SymbolHint = new HintInfo("symbol", "statement", "Declares a name that can be referenced by its index by objects in this file. \nExample: 'symbol \"name\"'");
+        public static readonly HintInfo SourceHint = new HintInfo("source", "statement", "Declares a filename that can be referenced in the file as a source code filename. \nExample: 'source \"C:\\file.osa\"'");
+        public static readonly HintInfo FunctionHint = new HintInfo("function", "statement", "Declares a function that will be implemented in this file, by stating its name, the parameter count, and the index of the subroutine that implements it. \nExample: `function \"MyTestFunction\", 3, 1'");
+        public static readonly HintInfo PropertyHint = new HintInfo("property", "member", "Declares an instance variable for the containing class. \nExample: 'property \"thing\"'");
+        public static readonly HintInfo MethodHint = new HintInfo("method", "member", "Declares an instance method for the containing class. \nExample: 'method \"thing\", 1'");
+
+        public static readonly HintInfo[] BlueKeywords = new HintInfo[] { BeginHint, EndHint };
+        public static readonly HintInfo[] BlockKeywords = new HintInfo[] { MetadataHint, StringsHint, GlobalsHint, SymbolsHint, SourcesHint, FunctionsHint, ClassesHint, ClassHint, SubroutineHint };
+        public static readonly HintInfo[] MetadataKeywords = new HintInfo[] { VersionHint };
+        public static readonly HintInfo[] StringsKeywords = new HintInfo[] { StringHint };
+        public static readonly HintInfo[] GlobalsKeywords = new HintInfo[] { GlobalHint };
+        public static readonly HintInfo[] SymbolsKeywords = new HintInfo[] { SymbolHint };
+        public static readonly HintInfo[] SourcesKeywords = new HintInfo[] { SourceHint };
+        public static readonly HintInfo[] FunctionsKeywords = new HintInfo[] { FunctionHint };
+        public static readonly HintInfo[] ClassesKeywords = new HintInfo[] { BeginHint, EndHint };
+        public static readonly HintInfo[] ClassKeywords = new HintInfo[] { PropertyHint, MethodHint };
+        public static readonly HintInfo[] SubroutineKeywords = new HintInfo[]
         {
-            "JumpTarget",
-            "PushConstanti32JumpTarget",
-            "BranchTarget",
-            "BranchAlwaysTarget",
-            "CompareAndBranchIfFalseTarget",
-            "PushConstantStringString",
-            "GetThisMemberFunctionString",
-            "GetThisMemberValueString",
-            "SetThisMemberValueString",
-            "GetMemberFunctionString",
-            "GetMemberValueString",
-            "SetMemberValueString",
-            "GetGameVariableString",
-            "SetGameVariableString",
-            "CallGameFunctionString",
-            "CallGameFunctionFromStringString",
-            "Nop",
-            "DebugOn",
-            "DebugOff",
-            "LineNumber",
-            "LineNumberAlt1",
-            "LineNumberAlt2",
-            "SetMemberValue",
-            "GetMemberValue",
-            "GetMemberFunction",
-            "CreateObject",
-            "MemberFunctionArgumentCheck",
-            "SetThisMemberValue",
-            "GetThisMemberValue",
-            "GetThisMemberFunction",
-            "GetMemberValueFromString",
-            "GetMemberFunctionFromString",
-            "SetMemberValueFromString",
-            "GetVariableValue",
-            "SetVariableValue",
-            "CreateStackVariables",
-            "IncrementVariable",
-            "DecrementVariable",
-            "Pop",
-            "PopN",
-            "Swap",
-            "Pull",
-            "DupN",
-            "Dup",
-            "PushConstanti32",
-            "PushConstanti24",
-            "PushConstanti16",
-            "PushConstanti8",
-            "PushConstantf32",
-            "PushConstant0",
-            "PushConstantString",
-            "PushNothing",
-            "PushConstantColor8888",
-            "PushConstantColor5551",
-            "JumpRelative",
-            "JumpAbsolute",
-            "Return",
-            "CompareAndBranchIfFalse",
-            "BranchAlways",
-            "EqualTo",
-            "LessThan",
-            "GreaterThan",
-            "LessOrEqual",
-            "GreaterOrEqual",
-            "And",
-            "Or",
-            "Not",
-            "BitwiseAnd",
-            "BitwiseOr",
-            "BitwiseXor",
-            "Add",
-            "Subtract",
-            "Multiply",
-            "Divide",
-            "Power",
-            "Modulus",
-            "BitwiseNot",
-            "ShiftLeft",
-            "ShiftRight",
-            "Increment",
-            "Decrement",
-            "GetGameVariable",
-            "SetGameVariable",
-            "CallGameFunction",
-            "CallGameFunctionFromString",
-            "CallGameFunctionDirect",
-            "CreateArray",
-            "GetArrayValue",
-            "ElementsInArray",
-            "SetArrayValue",
-            "AppendToArray",
-            "RemoveFromArray",
-            "InsertIntoArray",
-            "SetRedValue",
-            "SetGreenValue",
-            "SetBlueValue",
-            "SetAlphaValue",
-            "GetRedValue",
-            "GetGreenValue",
-            "GetBlueValue",
-            "GetAlphaValue",
-            "ConvertToString",
-            "ConvertToFloat",
-            "ConvertToInteger",
-            "IsInteger",
-            "IsFloat",
-            "IsString",
-            "IsAnObject",
-            "IsGameObject",
-            "IsArray",
-            "GetObjectClassID",
-            "Halt",
+            new HintInfo("JumpTarget", "instruction", ""),
+            new HintInfo("PushConstanti32JumpTarget", "instruction", ""),
+            new HintInfo("BranchTarget", "instruction", ""),
+            new HintInfo("BranchAlwaysTarget", "instruction", ""),
+            new HintInfo("CompareAndBranchIfFalseTarget", "instruction", ""),
+            new HintInfo("PushConstantStringString", "instruction", ""),
+            new HintInfo("GetThisMemberFunctionString", "instruction", ""),
+            new HintInfo("GetThisMemberValueString", "instruction", ""),
+            new HintInfo("SetThisMemberValueString", "instruction", ""),
+            new HintInfo("GetMemberFunctionString", "instruction", ""),
+            new HintInfo("GetMemberValueString", "instruction", ""),
+            new HintInfo("SetMemberValueString", "instruction", ""),
+            new HintInfo("GetGameVariableString", "instruction", ""),
+            new HintInfo("SetGameVariableString", "instruction", ""),
+            new HintInfo("CallGameFunctionString", "instruction", ""),
+            new HintInfo("CallGameFunctionFromStringString", "instruction", ""),
+            new HintInfo("Nop", "instruction", ""),
+            new HintInfo("DebugOn", "instruction", ""),
+            new HintInfo("DebugOff", "instruction", ""),
+            new HintInfo("LineNumber", "instruction", ""),
+            new HintInfo("LineNumberAlt1", "instruction", ""),
+            new HintInfo("LineNumberAlt2", "instruction", ""),
+            new HintInfo("SetMemberValue", "instruction", ""),
+            new HintInfo("GetMemberValue", "instruction", ""),
+            new HintInfo("GetMemberFunction", "instruction", ""),
+            new HintInfo("CreateObject", "instruction", ""),
+            new HintInfo("MemberFunctionArgumentCheck", "instruction", ""),
+            new HintInfo("SetThisMemberValue", "instruction", ""),
+            new HintInfo("GetThisMemberValue", "instruction", ""),
+            new HintInfo("GetThisMemberFunction", "instruction", ""),
+            new HintInfo("GetMemberValueFromString", "instruction", ""),
+            new HintInfo("GetMemberFunctionFromString", "instruction", ""),
+            new HintInfo("SetMemberValueFromString", "instruction", ""),
+            new HintInfo("GetVariableValue", "instruction", ""),
+            new HintInfo("SetVariableValue", "instruction", ""),
+            new HintInfo("CreateStackVariables", "instruction", ""),
+            new HintInfo("IncrementVariable", "instruction", ""),
+            new HintInfo("DecrementVariable", "instruction", ""),
+            new HintInfo("Pop", "instruction", ""),
+            new HintInfo("PopN", "instruction", ""),
+            new HintInfo("Swap", "instruction", ""),
+            new HintInfo("Pull", "instruction", ""),
+            new HintInfo("DupN", "instruction", ""),
+            new HintInfo("Dup", "instruction", ""),
+            new HintInfo("PushConstanti32", "instruction", ""),
+            new HintInfo("PushConstanti24", "instruction", ""),
+            new HintInfo("PushConstanti16", "instruction", ""),
+            new HintInfo("PushConstanti8", "instruction", ""),
+            new HintInfo("PushConstantf32", "instruction", ""),
+            new HintInfo("PushConstant0", "instruction", ""),
+            new HintInfo("PushConstantString", "instruction", ""),
+            new HintInfo("PushNothing", "instruction", ""),
+            new HintInfo("PushConstantColor8888", "instruction", ""),
+            new HintInfo("PushConstantColor5551", "instruction", ""),
+            new HintInfo("JumpRelative", "instruction", ""),
+            new HintInfo("JumpAbsolute", "instruction", ""),
+            new HintInfo("Return", "instruction", ""),
+            new HintInfo("CompareAndBranchIfFalse", "instruction", ""),
+            new HintInfo("BranchAlways", "instruction", ""),
+            new HintInfo("EqualTo", "instruction", ""),
+            new HintInfo("LessThan", "instruction", ""),
+            new HintInfo("GreaterThan", "instruction", ""),
+            new HintInfo("LessOrEqual", "instruction", ""),
+            new HintInfo("GreaterOrEqual", "instruction", ""),
+            new HintInfo("And", "instruction", ""),
+            new HintInfo("Or", "instruction", ""),
+            new HintInfo("Not", "instruction", ""),
+            new HintInfo("BitwiseAnd", "instruction", ""),
+            new HintInfo("BitwiseOr", "instruction", ""),
+            new HintInfo("BitwiseXor", "instruction", ""),
+            new HintInfo("Add", "instruction", ""),
+            new HintInfo("Subtract", "instruction", ""),
+            new HintInfo("Multiply", "instruction", ""),
+            new HintInfo("Divide", "instruction", ""),
+            new HintInfo("Power", "instruction", ""),
+            new HintInfo("Modulus", "instruction", ""),
+            new HintInfo("BitwiseNot", "instruction", ""),
+            new HintInfo("ShiftLeft", "instruction", ""),
+            new HintInfo("ShiftRight", "instruction", ""),
+            new HintInfo("Increment", "instruction", ""),
+            new HintInfo("Decrement", "instruction", ""),
+            new HintInfo("GetGameVariable", "instruction", ""),
+            new HintInfo("SetGameVariable", "instruction", ""),
+            new HintInfo("CallGameFunction", "instruction", ""),
+            new HintInfo("CallGameFunctionFromString", "instruction", ""),
+            new HintInfo("CallGameFunctionDirect", "instruction", ""),
+            new HintInfo("CreateArray", "instruction", ""),
+            new HintInfo("GetArrayValue", "instruction", ""),
+            new HintInfo("ElementsInArray", "instruction", ""),
+            new HintInfo("SetArrayValue", "instruction", ""),
+            new HintInfo("AppendToArray", "instruction", ""),
+            new HintInfo("RemoveFromArray", "instruction", ""),
+            new HintInfo("InsertIntoArray", "instruction", ""),
+            new HintInfo("SetRedValue", "instruction", ""),
+            new HintInfo("SetGreenValue", "instruction", ""),
+            new HintInfo("SetBlueValue", "instruction", ""),
+            new HintInfo("SetAlphaValue", "instruction", ""),
+            new HintInfo("GetRedValue", "instruction", ""),
+            new HintInfo("GetGreenValue", "instruction", ""),
+            new HintInfo("GetBlueValue", "instruction", ""),
+            new HintInfo("GetAlphaValue", "instruction", ""),
+            new HintInfo("ConvertToString", "instruction", ""),
+            new HintInfo("ConvertToFloat", "instruction", ""),
+            new HintInfo("ConvertToInteger", "instruction", ""),
+            new HintInfo("IsInteger", "instruction", ""),
+            new HintInfo("IsFloat", "instruction", ""),
+            new HintInfo("IsString", "instruction", ""),
+            new HintInfo("IsAnObject", "instruction", ""),
+            new HintInfo("IsGameObject", "instruction", ""),
+            new HintInfo("IsArray", "instruction", ""),
+            new HintInfo("GetObjectClassID", "instruction", ""),
+            new HintInfo("Halt", "instruction", ""),
 
         };
 
@@ -149,7 +171,7 @@ namespace OSIProject.Language.OSIAssembly
                 BlockContexts.Add("symbols", new BlockContext("symbols", SymbolsKeywords));
                 BlockContexts.Add("sources", new BlockContext("sources", SourcesKeywords));
                 BlockContexts.Add("functions", new BlockContext("functions", FunctionsKeywords));
-                BlockContexts.Add("classes", new BlockContext("classes", ClassesKeywords, new string[] { "class" }));
+                BlockContexts.Add("classes", new BlockContext("classes", ClassesKeywords, new HintInfo[] { ClassHint }));
                 BlockContexts.Add("class", new BlockContext("class", ClassKeywords));
                 BlockContexts.Add("subroutine", new BlockContext("subroutine", SubroutineKeywords));
             }
@@ -168,16 +190,30 @@ namespace OSIProject.Language.OSIAssembly
     public class BlockContext
     {
         public string Keyword { get; }
-        public IEnumerable<string> ValidFirstTokens { get; }
-        public IEnumerable<string> ValidSubBlocks { get; }
+        public IEnumerable<HintInfo> ValidFirstTokens { get; }
+        public IEnumerable<HintInfo> ValidSubBlocks { get; }
 
-        public BlockContext(string keyword, IEnumerable<string> validFirstTokens, IEnumerable<string> validSubBlocks = null)
+        public BlockContext(string keyword, IEnumerable<HintInfo> validFirstTokens, IEnumerable<HintInfo> validSubBlocks = null)
         {
             this.Keyword = keyword;
             this.ValidFirstTokens = validFirstTokens;
             this.ValidSubBlocks = validSubBlocks;
             if (this.ValidSubBlocks == null)
-                this.ValidSubBlocks = new List<string>();
+                this.ValidSubBlocks = new List<HintInfo>();
+        }
+    }
+
+    public class HintInfo
+    {
+        public string Name { get; }
+        public string IconID { get; }
+        public string Description { get; }
+
+        public HintInfo(string name, string iconID = "", string description = "")
+        {
+            this.Name = name;
+            this.IconID = iconID;
+            this.Description = description;
         }
     }
 
