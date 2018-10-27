@@ -21,7 +21,7 @@ namespace OSIProject.Language.OSIAssembly
         public static readonly HintInfo ClassHint = new HintInfo("class", "class", "Begins a block that defines the members (properties and methods) of a class.");
         public static readonly HintInfo SubroutineHint = new HintInfo("subroutine", "blocktype", "Begins a block that defines the behavior of a method or function.");
         // Statements
-        public static readonly HintInfo VersionHint = new HintInfo("version", "version", "Sets the OSI version of the file. \nExample: \version 4, 1'");
+        public static readonly HintInfo VersionHint = new HintInfo("version", "version", "Sets the OSI version of the file. \nExample: 'version 4, 1'");
         public static readonly HintInfo StringHint = new HintInfo("string", "string", "Defines text that can be referenced by its index. \nExample: 'string \"text\"'");
         public static readonly HintInfo GlobalHint = new HintInfo("global", "global", "Declares a global variable that can be referenced to be its index. \nExample: 'global \"globalclass\"'");
         public static readonly HintInfo SymbolHint = new HintInfo("symbol", "symbol", "Declares a name that can be referenced by its index by objects in this file. \nExample: 'symbol \"name\"'");

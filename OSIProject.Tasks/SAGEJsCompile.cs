@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -31,14 +31,24 @@ namespace OSIProject
             foreach (ITaskItem sourceFile in SourceFiles)
             {
                 Log.LogMessage(MessageImportance.High, "Assembling file '" + sourceFile.ItemSpec + "'...");
-                string resultFilename = Assemble(sourceFile.GetMetadata("FullPath"));
-                Log.LogMessage(MessageImportance.High, sourceFile.ItemSpec + " -> " + resultFilename);
+                bool success = false;
+                string resultFilename = Assemble(sourceFile.GetMetadata("FullPath"), out success);
+                if (success)
+                {
+                    Log.LogMessage(MessageImportance.High, sourceFile.ItemSpec + " -> " + resultFilename);
+                }
+                else
+                {
+
+                }
             }
             return !Log.HasLoggedErrors;
         }
 
-        private string Assemble(string sourceFilename)
+        private static string CurrentFilename = "";
+        private string Assemble(string sourceFilename, out bool success)
         {
+            CurrentFilename = sourceFilename;
             string resultFilename = System.IO.Path.Combine(OutputDirectory.GetMetadata("FullPath"), System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(sourceFilename), ".osi"));
             //Log.LogMessage(MessageImportance.High, "Output dir: '" + OutputDirectory.GetMetadata("FullPath") + "', combined: '" + resultFilename);
 
@@ -55,19 +65,49 @@ namespace OSIProject
             sageJS.ErrorDataReceived += SageJS_ErrorDataReceived;
 
             sageJS.Start();
+            sageJS.BeginErrorReadLine();
+            sageJS.BeginOutputReadLine();
             sageJS.WaitForExit();
 
+            int returnCode = sageJS.ExitCode;
+            if (returnCode != 0)
+            {
+                Log.LogError("OSI Assembly Failure!");
+            }
+            success = returnCode == 0;
             return resultFilename;
         }
 
         private void SageJS_ErrorDataReceived(object sender, System.Diagnostics.DataReceivedEventArgs e)
         {
-            Log.LogError(" > " + e.Data);
+            string output = e?.Data?.Trim();
+            if (output?.Length > 0)
+            {
+                if (output.StartsWith("at"))
+                    return;
+
+                string[] parts = output.Split(new char[] { ':' }, 2);
+                if (parts.Length > 1)
+                {
+                    string exceptionName = parts[0].Trim();
+                    string exceptionMessage = parts[1].Trim();
+                    if (exceptionMessage.Contains('@'))
+                    {
+                        string[] location = exceptionMessage.Substring(exceptionMessage.IndexOf('@') + 1).Split(':');
+                        int line = Int32.Parse(location[0].Trim());
+                        int column = Int32.Parse(location[1].Trim());
+                        Log.LogError(exceptionName, "ASM", "", CurrentFilename, line, column, line, column, exceptionMessage.Substring(0, exceptionMessage.IndexOf('@')));
+                        return;
+                    }
+                }
+                Log.LogError(e.Data);
+            }
         }
 
         private void SageJS_OutputDataReceived(object sender, System.Diagnostics.DataReceivedEventArgs e)
         {
-            Log.LogMessage(MessageImportance.High, " > " + e.Data);
+            if (e?.Data?.Trim().Length > 0)
+                Log.LogMessage(MessageImportance.High, " > " + e.Data);
         }
 
         /// <summary>
