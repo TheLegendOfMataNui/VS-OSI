@@ -20,6 +20,8 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio;
 using System.Runtime.InteropServices;
+using Microsoft.VisualStudio.Imaging.Interop;
+using Microsoft.VisualStudio.Imaging;
 
 namespace OSIProject
 {
@@ -428,6 +430,8 @@ namespace OSIProject
             private CompletionSourceProvider SourceProvider;
             private ITextBuffer Buffer;
 
+            private static Dictionary<string, ImageMoniker> IconLibrary = null;
+
             //private List<Completion> keywordCompletions = new List<Completion>();
             //private List<Completion> blockCompletions = new List<Completion>();
 
@@ -435,6 +439,22 @@ namespace OSIProject
             {
                 SourceProvider = sourceProvider;
                 Buffer = buffer;
+
+                if (IconLibrary == null)
+                {
+                    IconLibrary = new Dictionary<string, ImageMoniker>();
+                    IconLibrary.Add("blocktype", KnownMonikers.Module);
+                    IconLibrary.Add("class", KnownMonikers.Class);
+                    IconLibrary.Add("function", KnownMonikers.Method);
+                    IconLibrary.Add("global", KnownMonikers.Enumeration);
+                    IconLibrary.Add("instruction", KnownMonikers.IntellisenseKeyword);
+                    IconLibrary.Add("keyword", KnownMonikers.ObjectPublic);
+                    IconLibrary.Add("property", KnownMonikers.Member);
+                    IconLibrary.Add("source", KnownMonikers.LinkFile);
+                    IconLibrary.Add("string", KnownMonikers.String);
+                    IconLibrary.Add("symbol", KnownMonikers.EnumerationItemPublic);
+                    IconLibrary.Add("version", KnownMonikers.VersionInformation);
+                }
 
                 /*foreach (string s in Language.OSIAssembly.Language.BlueKeywords)
                 {
@@ -491,8 +511,9 @@ namespace OSIProject
                     List<Completion> completions = new List<Completion>();
                     foreach (HintInfo h in GetEnclosingContext(line.LineNumber).ValidFirstTokens)
                     {
-                        completions.Add(new Completion(h.Name, h.Name, h.Description, null, null));
+                        completions.Add(new Completion3(h.Name, h.Name, h.Description, IconLibrary[h.IconID], null));
                     }
+                    completions.Sort(new Comparison<Completion>((c1, c2) => c1.DisplayText.CompareTo(c2.DisplayText)));
 
                     completionSets.Add(new CompletionSet("Keywords", "Keywords", span, completions, null));
                 }
@@ -503,8 +524,9 @@ namespace OSIProject
                     List<Completion> completions = new List<Completion>();
                     foreach (HintInfo h in GetEnclosingContext(line.LineNumber).ValidSubBlocks)
                     {
-                        completions.Add(new Completion(h.Name, h.Name, h.Description, null, null));
+                        completions.Add(new Completion3(h.Name, h.Name, h.Description, IconLibrary[h.IconID], null));
                     }
+                    completions.Sort(new Comparison<Completion>((c1, c2) => c1.DisplayText.CompareTo(c2.DisplayText)));
 
                     completionSets.Add(new CompletionSet("Blocks", "Blocks", span, completions, null));
                 }

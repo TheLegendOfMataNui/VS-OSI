@@ -15,23 +15,25 @@ namespace OSIProject.Language.OSIAssembly
         public static readonly HintInfo StringsHint = new HintInfo("strings", "blocktype", "Begins a block that lists all the strings used in the file. They can be referred to later by their index in this block.");
         public static readonly HintInfo GlobalsHint = new HintInfo("globals", "blocktype", "Begins a block that lists all the global variables used in the file. They can be referred to later by their index in this block.");
         public static readonly HintInfo SymbolsHint = new HintInfo("symbols", "blocktype", "Begins a block that lists all the symbols (names) used in the file. They can be referred to later by their index in this block.");
-        public static readonly HintInfo SourcesHint = new HintInfo("sources", "blocktyle", "Begins a block that lists all the source filesnames used in the file. They can be referred to later by their index in this block.");
+        public static readonly HintInfo SourcesHint = new HintInfo("sources", "blocktype", "Begins a block that lists all the source filesnames used in the file. They can be referred to later by their index in this block.");
         public static readonly HintInfo FunctionsHint = new HintInfo("functions", "blocktype", "Begins a block that describes all the functions that this OSI defines.");
         public static readonly HintInfo ClassesHint = new HintInfo("classes", "blocktype", "Begins a block that defines all the classes that this OSI defines.");
-        public static readonly HintInfo ClassHint = new HintInfo("class", "blocktype", "Begins a block that defines the members (properties and methods) of a class.");
+        public static readonly HintInfo ClassHint = new HintInfo("class", "class", "Begins a block that defines the members (properties and methods) of a class.");
         public static readonly HintInfo SubroutineHint = new HintInfo("subroutine", "blocktype", "Begins a block that defines the behavior of a method or function.");
         // Statements
-        public static readonly HintInfo VersionHint = new HintInfo("version", "statement", "Sets the OSI version of the file. \nExample: \version 4, 1'");
-        public static readonly HintInfo StringHint = new HintInfo("string", "statement", "Defines text that can be referenced by its index. \nExample: 'string \"text\"'");
-        public static readonly HintInfo GlobalHint = new HintInfo("global", "statement", "Declares a global variable that can be referenced to be its index. \nExample: 'global \"globalclass\"'");
-        public static readonly HintInfo SymbolHint = new HintInfo("symbol", "statement", "Declares a name that can be referenced by its index by objects in this file. \nExample: 'symbol \"name\"'");
-        public static readonly HintInfo SourceHint = new HintInfo("source", "statement", "Declares a filename that can be referenced in the file as a source code filename. \nExample: 'source \"C:\\file.osa\"'");
-        public static readonly HintInfo FunctionHint = new HintInfo("function", "statement", "Declares a function that will be implemented in this file, by stating its name, the parameter count, and the index of the subroutine that implements it. \nExample: `function \"MyTestFunction\", 3, 1'");
-        public static readonly HintInfo PropertyHint = new HintInfo("property", "member", "Declares an instance variable for the containing class. \nExample: 'property \"thing\"'");
-        public static readonly HintInfo MethodHint = new HintInfo("method", "member", "Declares an instance method for the containing class. \nExample: 'method \"thing\", 1'");
+        public static readonly HintInfo VersionHint = new HintInfo("version", "version", "Sets the OSI version of the file. \nExample: \version 4, 1'");
+        public static readonly HintInfo StringHint = new HintInfo("string", "string", "Defines text that can be referenced by its index. \nExample: 'string \"text\"'");
+        public static readonly HintInfo GlobalHint = new HintInfo("global", "global", "Declares a global variable that can be referenced to be its index. \nExample: 'global \"globalclass\"'");
+        public static readonly HintInfo SymbolHint = new HintInfo("symbol", "symbol", "Declares a name that can be referenced by its index by objects in this file. \nExample: 'symbol \"name\"'");
+        public static readonly HintInfo SourceHint = new HintInfo("source", "source", "Declares a filename that can be referenced in the file as a source code filename. \nExample: 'source \"C:\\file.osa\"'");
+        public static readonly HintInfo FunctionHint = new HintInfo("function", "function", "Declares a function that will be implemented in this file, by stating its name, the parameter count, and the index of the subroutine that implements it. \nExample: `function \"MyTestFunction\", 3, 1'");
+        // Members
+        public static readonly HintInfo PropertyHint = new HintInfo("property", "property", "Declares an instance variable for the containing class. \nExample: 'property \"thing\"'");
+        public static readonly HintInfo MethodHint = new HintInfo("method", "function", "Declares an instance method for the containing class. \nExample: 'method \"thing\", 1'");
 
         public static readonly HintInfo[] BlueKeywords = new HintInfo[] { BeginHint, EndHint };
         public static readonly HintInfo[] BlockKeywords = new HintInfo[] { MetadataHint, StringsHint, GlobalsHint, SymbolsHint, SourcesHint, FunctionsHint, ClassesHint, ClassHint, SubroutineHint };
+        public static readonly HintInfo[] TopLevelBlockKeywords = new HintInfo[] { MetadataHint, StringsHint, GlobalsHint, SymbolsHint, SourcesHint, FunctionsHint, ClassesHint, SubroutineHint };
         public static readonly HintInfo[] MetadataKeywords = new HintInfo[] { VersionHint };
         public static readonly HintInfo[] StringsKeywords = new HintInfo[] { StringHint };
         public static readonly HintInfo[] GlobalsKeywords = new HintInfo[] { GlobalHint };
@@ -164,7 +166,7 @@ namespace OSIProject.Language.OSIAssembly
             if (BlockContexts == null)
             {
                 BlockContexts = new Dictionary<string, BlockContext>();
-                TopContext = new BlockContext(null, BlueKeywords, BlockKeywords);
+                TopContext = new BlockContext(null, BlueKeywords, TopLevelBlockKeywords);
                 BlockContexts.Add("metadata", new BlockContext("metadata", MetadataKeywords));
                 BlockContexts.Add("strings", new BlockContext("strings", StringsKeywords));
                 BlockContexts.Add("globals", new BlockContext("globals", GlobalsKeywords));
