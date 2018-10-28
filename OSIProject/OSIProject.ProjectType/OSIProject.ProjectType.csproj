@@ -207,7 +207,9 @@
   -->
   <ItemGroup>
     <None Include="BuildSystem\DeployedBuildSystem\OSIProject.props" />
-    <None Include="BuildSystem\DeployedBuildSystem\OSIProject.targets" />
+    <None Include="BuildSystem\DeployedBuildSystem\OSIProject.targets">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <!--
   The XAML files provide buth compile-time implementations for CPS rules as well as
@@ -247,6 +249,12 @@
     <XamlPropertyRule Include="BuildSystem\Rules\OSIAssembly.xaml">
       <SubType>Designer</SubType>
     </XamlPropertyRule>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="BuildSystem\Rules\debugger_general.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />

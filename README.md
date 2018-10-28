@@ -37,3 +37,5 @@ See `OSADeploy.cs` for what will eventually be the copy-to-game deploy task.
 See `ScriptDebuggerLaunchProvider.cs` for the debugger launching stuff.
 
 `OSIProject.Tasks` - The library that holds the MSBuild tasks for compiling OSI material.
+
+`OSIProject.DebugServer` - The SAGE Hookmod that hooks the game's OSI virtual machine an provides debugging capabilities.

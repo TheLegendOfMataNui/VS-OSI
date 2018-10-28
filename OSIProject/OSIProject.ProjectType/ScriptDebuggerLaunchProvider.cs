@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
 
 namespace OSIProject
 {
-#if false
+#if true
     [ExportDebugger("OSIDebugger")]
     [AppliesTo(MyUnconfiguredProject.UniqueCapability)]
     public class ScriptDebuggerLaunchProvider : DebugLaunchProviderBase
@@ -39,9 +39,9 @@ namespace OSIProject
             //var generalProperties = await this.ProjectProperties.GetConfigurationGeneralPropertiesAsync();
             //string startupItem = await generalProperties.StartItem.GetEvaluatedValueAtEndAsync();
             //return !string.IsNullOrEmpty(startupItem);
-            /*var debuggerProperties = await this.ProjectProperties.GetOSIDebuggerPropertiesAsync();
+            var debuggerProperties = await this.ProjectProperties.GetOSIDebuggerPropertiesAsync();
             string gameExecutable = await debuggerProperties.GameExecutable.GetEvaluatedValueAtEndAsync();
-            return System.IO.File.Exists(gameExecutable);*/
+            return System.IO.File.Exists(gameExecutable);
 
             //return true;
         }
@@ -59,9 +59,9 @@ namespace OSIProject
 
             var generalProperties = await this.ProjectProperties.GetConfigurationGeneralPropertiesAsync();
 
-            /*var debuggerProperties = await this.ProjectProperties.GetOSIDebuggerPropertiesAsync();
+            var debuggerProperties = await this.ProjectProperties.GetOSIDebuggerPropertiesAsync();
             settings.CurrentDirectory = System.IO.Path.GetDirectoryName(await debuggerProperties.GameExecutable.GetEvaluatedValueAtEndAsync());
-            settings.Executable = await debuggerProperties.GameExecutable.GetEvaluatedValueAtEndAsync();*/
+            settings.Executable = await debuggerProperties.GameExecutable.GetEvaluatedValueAtEndAsync();
             settings.Arguments = "";
 
 
@@ -87,7 +87,7 @@ namespace OSIProject
             return new IDebugLaunchSettings[] { settings };
         }
     }
-#endif
+#else
     [ExportDebugger(ScriptDebugger.SchemaName)]
     [AppliesTo("")] //MyUnconfiguredProject.UniqueCapability
     public class ScriptDebuggerLaunchProvider : DebugLaunchProviderBase
@@ -149,5 +149,6 @@ namespace OSIProject
             return new IDebugLaunchSettings[] { settings };
         }
     }
+#endif
 }
 

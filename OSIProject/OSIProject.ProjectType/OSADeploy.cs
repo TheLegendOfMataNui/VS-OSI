@@ -60,6 +60,11 @@ namespace OSIProject
 
             await outputPaneWriter.WriteLineAsync("Copying output to '" + gameDirectory + "'...");*/
 
+            /*foreach (IOutputGroup output in await configuredProject.Services.OutputGroups.GetOutputGroupsAsync())
+            {
+                await outputPaneWriter.WriteLineAsync("Output group: " + output.DisplayName + " (" + output.Name + ") built from target " + output.TargetName + " " + output.Outputs.Count + " items");
+            }*/
+
             // Add your custom deploy code here. Write informational output to the outputPaneWriter.
             await outputPaneWriter.WriteAsync("Hello Deploy!!!");
         }
