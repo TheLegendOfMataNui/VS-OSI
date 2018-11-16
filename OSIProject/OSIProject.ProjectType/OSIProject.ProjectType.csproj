@@ -206,7 +206,9 @@
   final implementation, and provide the basic processing for handling rules in CPS.
   -->
   <ItemGroup>
-    <None Include="BuildSystem\DeployedBuildSystem\OSIProject.props" />
+    <None Include="BuildSystem\DeployedBuildSystem\OSIProject.props">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="BuildSystem\DeployedBuildSystem\OSIProject.targets">
       <SubType>Designer</SubType>
     </None>
@@ -282,4 +284,9 @@
   <Import Project="..\..\packages\Microsoft.VisualStudio.ProjectSystem.15.8.243\build\Microsoft.VisualStudio.ProjectSystem.targets" Condition="Exists('..\..\packages\Microsoft.VisualStudio.ProjectSystem.15.8.243\build\Microsoft.VisualStudio.ProjectSystem.targets')" />
   <Import Project="..\..\packages\Microsoft.VisualStudio.ProjectSystem.Sdk.Tools.15.8.243\build\Microsoft.VisualStudio.ProjectSystem.Sdk.Tools.targets" Condition="Exists('..\..\packages\Microsoft.VisualStudio.ProjectSystem.Sdk.Tools.15.8.243\build\Microsoft.VisualStudio.ProjectSystem.Sdk.Tools.targets')" />
   <Import Project="..\..\packages\Microsoft.VisualStudio.Threading.Analyzers.15.8.168\build\Microsoft.VisualStudio.Threading.Analyzers.targets" Condition="Exists('..\..\packages\Microsoft.VisualStudio.Threading.Analyzers.15.8.168\build\Microsoft.VisualStudio.Threading.Analyzers.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>cd "$(SolutionDir)"
+xcopy "$(LocalAppData)\CustomProjectSystems\OSIProject" "$(MSBuildProgramFiles32)\Litestone\SAGE-JS MSBuild Support\OSIProject" /y /s
+"$(ProgramFiles)\Inno Setup 5\ISCC.exe" /O"Installer\$(Configuration)" /DConfiguration=$(Configuration) "Installer.iss"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

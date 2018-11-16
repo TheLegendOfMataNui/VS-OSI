@@ -12,6 +12,11 @@
 
 # Build results
 [Dd]ebug/
+Beta Release/
+Beta Debug/
+Alpha Debug/
+Alpha Release/
+Output/
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/

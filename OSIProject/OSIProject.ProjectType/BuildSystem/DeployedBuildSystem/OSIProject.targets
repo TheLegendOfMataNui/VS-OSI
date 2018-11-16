@@ -59,7 +59,8 @@
   </ItemGroup>
 
   <Import Project="$(MSBuildProjectFullPath).user" Condition="Exists('$(MSBuildProjectFullPath).user')" />
-  <UsingTask TaskName="SAGEJsCompile" AssemblyFile="$(Registry:HKEY_CURRENT_USER\Software\Litestone\VSOSI@TaskDLL)"/>
+  <UsingTask TaskName="SAGEJsCompile" AssemblyFile="$(MSBuildProgramFiles32)\Litestone\SAGE-JS MSBuild Support\OSIProject.Tasks.dll"/>
+  <!--<UsingTask TaskName="SAGEJsCompile" AssemblyName="OSIProject.Tasks, Version=1.1.0.2, Culture=neutral, PublicKeyToken=null"/>-->
 
   <Target Name="Run">
     <Message Text="$(RunCommandArguments)" />
@@ -67,7 +68,7 @@
   </Target>
 
   <Target Name="Build" >
-    <SAGEJsCompile SourceFiles="@(OSIAssembly)" OutputDirectory="bin/"/>
+    <SAGEJsCompile SourceFiles="@(OSIAssembly)" OutputDirectory="$(OutputDirectory)"/>
   </Target>
 
   <Target Name="Rebuild">

@@ -9,18 +9,20 @@ Goals
    - [X] Code prediction
    - [ ] Instruction signature help
  - [ ] OSI Projects for compiling OSI Assembly into OSI using [SAGE-JS](https://github.com/TheLegendOfMataNui/sage-js)
-   - [X] SAGE-JS MSBuild task (!! installation method needs help: the Project definition requires the path to the embedded `OSIProject.Tasks.dll` to be in the registry before it will work!!)
-   - [ ] [WIP] Post-build deploy task: Copy the output .osi files to the game directory
-   - [ ] [WIP] Launch the game when the run action is activated
-   - [ ] Maybe an actual debug engine for stepping through the bytecode live? (Would require a hookmod)
-     - [ ] Attach and detatch properly
-     - [ ] Pipe game debug output to VS Output Window
-     - [ ] Breakpoints
-     - [ ] Step one instruction
-     - [ ] Browse & modify VM state
+   - [X] SAGE-JS MSBuild task (Installed to a well-known path by the installer)
+   - [X] Launch the game when the run action is activated
+   - [ ] Don't rebuild unchanged sources
+ - [ ] An actual debug engine for debugging the bytecode live
+   - [ ] Attach and detatch properly
+   - [ ] Pipe game debug output to VS Output Window
+   - [ ] Breakpoints
+   - [ ] Step one instruction
+   - [ ] Browse & modify VM state
 
 Project Overview
 ----------------
+
+`Installer.iss` - An installer script that is compiled by [Inno Setup](http://www.jrsoftware.org/isinfo.php) into the `Output/` directory upon build. Requires Inno Setup to be installed. An installer is necessary for installing the MSBuild task.
 
 `OSIProject.Language` - The details of OSI stuff. `OSIAssembly.cs` for OSI Assembly (lexing, tokens, and keywords), and maybe later an `OSIFile.cs` for the actual packed `.osi` format.
 
@@ -38,4 +40,6 @@ See `ScriptDebuggerLaunchProvider.cs` for the debugger launching stuff.
 
 `OSIProject.Tasks` - The library that holds the MSBuild tasks for compiling OSI material.
 
-`OSIProject.DebugServer` - The SAGE Hookmod that hooks the game's OSI virtual machine an provides debugging capabilities.
+`OSIProject.DebugServer` - The SAGE Hookmod that hooks the game's OSI virtual machine and provides debugging capabilities.
+
+`OSIProject.DebugInterop` - The .NET classes for attaching to a debug server.

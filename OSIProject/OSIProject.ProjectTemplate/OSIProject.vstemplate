@@ -5,7 +5,7 @@
     <Description>A template for creating a SAGE OSI project.</Description>
     <Icon>OSIProject.ico</Icon>
     <ProjectType>SAGE OSI</ProjectType>
-    <RequiredFrameworkVersion>4.5.2</RequiredFrameworkVersion>
+    <!--<RequiredFrameworkVersion>4.5.2</RequiredFrameworkVersion>-->
     <SortOrder>1</SortOrder>
     <TemplateID>{294b30db-7226-47eb-95f6-b59d64bc32b8}</TemplateID>
     <CreateNewFolder>true</CreateNewFolder>
