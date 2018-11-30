@@ -34,7 +34,7 @@ namespace OSIProject
         internal static ContentTypeDefinition OSIAsmContentType;
 
         [Export]
-        [FileExtension(".osa")]
+        [FileExtension(".osas")]
         [ContentType("osiasm")]
         internal static FileExtensionToContentTypeDefinition OSIAsmExtensionToContentType;
 
@@ -244,7 +244,7 @@ namespace OSIProject
                             if (t < Tokens.Count - 1)
                             {
                                 Token blockType = Tokens[t + 1];
-                                newRegion.CollapsedText = blockType.Content;
+                                newRegion.CollapsedText = "begin " + blockType.Content;
                                 if (blockType.Type == TokenType.Keyword && t < Tokens.Count - 2)
                                 {
                                     if (blockType.Content == "class")
@@ -252,10 +252,15 @@ namespace OSIProject
                                         Token className = Tokens[t + 2];
                                         newRegion.CollapsedText += " " + className.Content;
                                     }
-                                    else if (blockType.Content == "subroutine")
+                                    /*else if (blockType.Content == "subroutine")
                                     {
                                         Token subName = Tokens[t + 2];
                                         newRegion.CollapsedText += " " + subName.Content;
+                                    }*/
+                                    else if (blockType.Content == "function" || blockType.Content == "method")
+                                    {
+                                        Token name = Tokens[t + 2];
+                                        newRegion.CollapsedText += " " + name.Content;
                                     }
                                 }
                             }

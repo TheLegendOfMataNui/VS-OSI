@@ -51,7 +51,6 @@
   <ItemGroup>
     <None Include="OSIProject.osiproj" />
     <None Include="OSIProject.ico" />
-    <None Include="Script.osa" />
   </ItemGroup>
   <ItemGroup>
     <VSTemplate Include="OSIProject.vstemplate">

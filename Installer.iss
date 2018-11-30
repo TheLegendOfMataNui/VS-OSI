@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "SAGE-JS MSBuild Support"
-#define MyAppVersion "1.1.0.3"
+#define MyAppVersion "1.1.1.0"
 #define MyAppPublisher "Litestone"
 #define MyAppURL "https://github.com/TheLegendOfMataNui/VS-OSI/"
 #ifndef Configuration
@@ -25,7 +25,7 @@ DefaultDirName={pf}\Litestone\SAGE-JS MSBuild Support\
 DisableDirPage=yes
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-OutputBaseFilename=SAGE-JS_MSBuild_{#MyAppVersion}
+OutputBaseFilename=VS-OSI_{#MyAppVersion}_{#Configuration}
 Compression=lzma
 SolidCompression=yes
 
@@ -36,7 +36,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Source: "OSIProject.Tasks\bin\{#Configuration}\OSIProject.Tasks.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "OSIProject\OSIProject.ProjectType\BuildSystem\DeployedBuildSystem\*"; DestDir: "{app}\OSIProject";
 Source: "OSIProject\OSIProject.ProjectType\BuildSystem\Rules\*"; DestDir: "{app}\OSIProject\Rules";
-Source: "OSIProject\OSIProject.ProjectType\bin\{#Configuration}\OSIProject.vsix"; DestDir: "{app}";
+Source: "OSIProject\OSIProject.ProjectType\bin\{#Configuration}\OSIProject.vsix"; DestDir: "{app}"; Flags: ignoreversion;
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Run]

@@ -305,6 +305,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ClassTracker.h" />
     <ClInclude Include="Debugger.h" />
     <ClInclude Include="DebuggerProtocol.h" />
     <ClInclude Include="Event.h" />
@@ -314,6 +315,7 @@
     <ClInclude Include="VMInterface.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ClassTracker.cpp" />
     <ClCompile Include="Debugger.cpp" />
     <ClCompile Include="DebuggerProtocol.cpp" />
     <ClCompile Include="dllmain.cpp" />

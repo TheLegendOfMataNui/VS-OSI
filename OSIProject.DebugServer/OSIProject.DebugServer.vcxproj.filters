@@ -36,6 +36,9 @@
     <ClInclude Include="SocketIO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ClassTracker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -60,6 +63,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DebuggerProtocol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ClassTracker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
