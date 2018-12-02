@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="OSIProject.ProjectType..ee699766-b363-4460-ae19-a501b8cdb797" Version="1.0" Language="en-US" Publisher="OSIProject.ProjectType" />
+        <Identity Id="OSIProject.ProjectType..ee699766-b363-4460-ae19-a501b8cdb797" Version="1.2.0.0" Language="en-US" Publisher="Litestone" />
         <DisplayName>SAGE OSI Project VSIX</DisplayName>
         <Description xml:space="preserve">A template for creating a SAGE OSI Project project.</Description>
     </Metadata>

@@ -11,5 +11,6 @@
     <RunWorkingDirectory>$(MSBuildProjectDirectory)</RunWorkingDirectory>
     <StartItem>Script.osa</StartItem>-->
     <OutputDirectory>bin\</OutputDirectory>
+    <OutputFilename>base.osi</OutputFilename>
   </PropertyGroup>
 </Project>

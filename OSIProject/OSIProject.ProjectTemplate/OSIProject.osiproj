@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
-      <CustomProjectExtensionsPath>$(MSBuildProgramFiles32)\Litestone\SAGE-JS MSBuild Support\OSIProject\</CustomProjectExtensionsPath>
+      <CustomProjectExtensionsPath>$(MSBuildProgramFiles32)\Litestone\VS-OSI\OSIProject\</CustomProjectExtensionsPath>
   </PropertyGroup>
   <Import Project="$(CustomProjectExtensionsPath)OSIProject.props" />
   <ItemGroup>

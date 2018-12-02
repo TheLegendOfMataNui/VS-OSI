@@ -33,6 +33,12 @@
         </StringProperty.ValueEditors>
     </StringProperty>
 
+    <StringProperty Name="OutputFilename" DisplayName="Output Filename">
+        <StringProperty.DataSource>
+            <DataSource Persistence="ProjectFile" HasConfigurationCondition="True" />
+        </StringProperty.DataSource>
+    </StringProperty>
+
     <StringProperty Name="ProjectGuid" Visible="False">
         <StringProperty.DataSource>
             <DataSource Persistence="ProjectFile" Label="Globals" HasConfigurationCondition="False" />

@@ -11,11 +11,17 @@ namespace OSIProject
 {
     public class SAGEJsCompile : Task
     {
+        /*[Required]
+        public ITaskItem[] SourceFiles { get; set; }*/
+
         [Required]
-        public ITaskItem[] SourceFiles { get; set; }
+        public ITaskItem SourceDirectory { get; set; }
 
         [Required]
         public ITaskItem OutputDirectory { get; set; }
+
+        [Required]
+        public ITaskItem OutputFilename { get; set; }
 
         /*[Required]
         public ITaskItem ProjectDirectory { get; set; }*/
@@ -28,7 +34,7 @@ namespace OSIProject
             //Log.LogWarning("HEY!!!! " + SourceFiles.Length);
             if (!System.IO.Directory.Exists(OutputDirectory.ItemSpec))
                 System.IO.Directory.CreateDirectory(OutputDirectory.ItemSpec);
-            foreach (ITaskItem sourceFile in SourceFiles)
+            /*foreach (ITaskItem sourceFile in SourceFiles)
             {
                 Log.LogMessage(MessageImportance.High, "Assembling file '" + sourceFile.ItemSpec + "'...");
                 bool success = false;
@@ -41,22 +47,43 @@ namespace OSIProject
                 {
 
                 }
+            }*/
+
+            bool success = false;
+            /*List<string> sourceFiles = new List<string>();
+            foreach (ITaskItem task in SourceFiles)
+            {
+                sourceFiles.Add(task.GetMetadata("FullPath"));
             }
+            string resultFilename = Assemble(sourceFiles.ToArray(), out success);*/
+            string resultFilename = Assemble(new string[] { SourceDirectory.GetMetadata("FullPath") }, out success);
+            if (success)
+            {
+                Log.LogMessage(MessageImportance.High, " -> " + resultFilename);
+            }
+            else
+            {
+
+            }
+
             return !Log.HasLoggedErrors;
         }
 
         private static string CurrentFilename = "";
-        private string Assemble(string sourceFilename, out bool success)
+        private string Assemble(string[] sourceFilenames, out bool success)
         {
-            CurrentFilename = sourceFilename;
-            string resultFilename = System.IO.Path.Combine(OutputDirectory.GetMetadata("FullPath"), System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(sourceFilename), ".osi"));
+            CurrentFilename = "(Multiple Files)";
+            string resultFilename = System.IO.Path.Combine(OutputDirectory.GetMetadata("FullPath"), OutputFilename.ItemSpec);
             //Log.LogMessage(MessageImportance.High, "Output dir: '" + OutputDirectory.GetMetadata("FullPath") + "', combined: '" + resultFilename);
 
             System.Diagnostics.Process sageJS = new System.Diagnostics.Process();
             sageJS.StartInfo.FileName = FindExePath("sage-js.cmd");
-            sageJS.StartInfo.Arguments = "res:osi:asm:a \"" + sourceFilename + "\" \"" + resultFilename + "\"";
+            sageJS.StartInfo.Arguments = "res:osi:asm:sa \"" + resultFilename + "\"";// \"" + resultFilename + "\"";
 
-            //Log.LogWarning("Command: '" + sageJS.StartInfo.FileName + " " + sageJS.StartInfo.Arguments + "'");
+            foreach (string filename in sourceFilenames)
+                sageJS.StartInfo.Arguments += " \"" + filename + "\"";
+
+            Log.LogWarning("Command: '" + sageJS.StartInfo.FileName + " " + sageJS.StartInfo.Arguments + "'");
 
             sageJS.StartInfo.UseShellExecute = false;
             sageJS.StartInfo.RedirectStandardOutput = true;
