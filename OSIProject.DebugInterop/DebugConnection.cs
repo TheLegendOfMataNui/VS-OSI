@@ -16,7 +16,7 @@ namespace OSIProject.DebugInterop
         public event EventHandler ServerChangeState;
         public event EventHandler ServerExecutionState;
         public event EventHandler ServerStackState;
-        public event EventHandler ServerDebugOutput;
+        public event EventHandler<string> ServerDebugOutput;
         public event EventHandler ServerException;
 
         private object StateSyncObject = new object();
@@ -56,6 +56,7 @@ namespace OSIProject.DebugInterop
                 }
             }
         }
+        private System.IO.BinaryWriter Writer;
 
         private Thread ListenThread;
         private AutoResetEvent ConnectedEvent = new AutoResetEvent(false);
@@ -70,7 +71,7 @@ namespace OSIProject.DebugInterop
             this.Port = port;
         }
 
-        public async void Connect()
+        public async Task Connect()
         {
             if (this.IsConnected)
             {
@@ -82,7 +83,7 @@ namespace OSIProject.DebugInterop
             await this.ConnectedEvent.AsTask();
         }
 
-        public async void Disconnect()
+        public async Task Disconnect()
         {
             if (!IsConnected)
                 return;
@@ -91,36 +92,94 @@ namespace OSIProject.DebugInterop
             await this.ShutdownEvent.AsTask();
         }
 
-        private void HandlePacket(PayloadType type, System.IO.BinaryReader payloadReader)
+        private void HandlePacket(PacketHeader header, System.IO.BinaryReader payloadReader)
         {
-            System.Diagnostics.Debug.WriteLine("Handling packet of type " + type.ToString());
+            System.Diagnostics.Debug.WriteLine("Handling packet of type " + header.Type.ToString());
+
+            if (header.Type == PayloadType.ServerConnected)
+            {
+                IsConnected = true;
+                ConnectedEvent.Set();
+            }
+            else if (header.Type == PayloadType.ServerDisconnect)
+            {
+                if (!IsConnected)
+                    throw new Exception("Connection attempt was rejected.");
+                else
+                    this.ClientConnection.Close();
+            }
+            else if (header.Type == PayloadType.ServerDebugOutput)
+            {
+                this.ServerDebugOutput?.Invoke(this, new ServerDebugOutputPayload(payloadReader).Output);
+            }
+            else
+            {
+                payloadReader.ReadBytes(header.PayloadLength);
+                System.Diagnostics.Debug.WriteLine("Recieved unimplemented packet of type " + header.Type.ToString());
+            }
+
+        }
+
+        public void SendPacket(PacketHeader header, Payload payload)
+        {
+            System.Diagnostics.Debug.WriteLine("Writing packet of type " + header.Type.ToString());
+
+            lock (StateSyncObject)
+            {
+                header.Write(Writer);
+                if (payload != null)
+                    payload.Write(Writer);
+                Writer.Flush();
+            }
         }
 
         private void ListenThreadEntrypoint()
         {
+            System.IO.MemoryStream ms = new System.IO.MemoryStream();
+            System.IO.BinaryReader reader = new System.IO.BinaryReader(ms);
             try
             {
                 this.ClientConnection = new TcpClient(this.Host, this.Port);
+                this.ClientConnection.NoDelay = true;
 
-                System.IO.MemoryStream ms = new System.IO.MemoryStream();
-                System.IO.BinaryReader reader = new System.IO.BinaryReader(ms);
-                int read = -1;
+                lock (StateSyncObject)
+                    Writer = new System.IO.BinaryWriter(this.ClientConnection.GetStream());
+
+                //Thread.Sleep(3000);
+
+                SendPacket(new PacketHeader(0, PayloadType.ClientConnection), new ClientConnectionPayload(ClientConnectionPayload.CurrentVersionMajor, ClientConnectionPayload.CurrentVersionMinor));
+                int read = 1;
                 while (read > 0)
                 {
-                    ms.Capacity = 4;
-                    read = this.ClientConnection.GetStream().Read(ms.GetBuffer(), 0, 4);
-                    if (read == 0)
+                    ms.SetLength(4);
+                    ms.Position = 0;
+                    while (ms.Position < 4)
+                    {
+                        read = this.ClientConnection.GetStream().Read(ms.GetBuffer(), (int)ms.Position, (int)ms.Length - (int)ms.Position);
+                        ms.Position += read;
+                        if (read <= 0)
+                            break;
+                    }
+                    if (read <= 0)
                         break;
+
+                    //ms.SetLength(read);
                     ms.Position = 0;
                     PacketHeader header = new PacketHeader(reader);
                     ms.Position = 0;
 
                     if (header.PayloadLength > 0)
                     {
-                        ms.Capacity = header.PayloadLength;
-                        read = this.ClientConnection.GetStream().Read(ms.GetBuffer(), 0, header.PayloadLength);
+                        ms.SetLength(header.PayloadLength);
+                        while (ms.Position < header.PayloadLength)
+                        {
+                            read = this.ClientConnection.GetStream().Read(ms.GetBuffer(), (int)ms.Position, (int)ms.Length - (int)ms.Position);
+                            ms.Position += read;
+                            if (read <= 0)
+                                break;
+                        }
                         ms.Position = 0;
-                        if (read == 0)
+                        if (read <= 0)
                             break;
                     }
 
@@ -130,7 +189,7 @@ namespace OSIProject.DebugInterop
                     }
                     else
                     {
-                        HandlePacket(header.Type, reader);
+                        HandlePacket(header, reader);
                     }
                     ms.Position = 0;
                 }
@@ -139,11 +198,18 @@ namespace OSIProject.DebugInterop
             {
                 System.Diagnostics.Debug.WriteLine("Exception in ListenThreadEntrypoint: " + ex.ToString());
             }
+            if (!this.IsConnected)
+                this.ConnectedEvent.Set();
             this.ClientConnection?.Close();
             this.ClientConnection?.Dispose();
             System.Diagnostics.Debug.WriteLine("Connection closed.");
             this.IsConnected = false;
+            //this.ServerDisconnect?.Invo
+            //EventContext.Send((state) => { this.ServerDisconnect?.Invoke(null, null); }, null);
+            this.ServerDisconnect?.Invoke(this, new EventArgs());
             this.ShutdownEvent.Set();
+            ms.Dispose();
+            reader.Dispose();
         }
     }
 

@@ -18,6 +18,7 @@ namespace Debugger {
 			ClientBreak, // From client: Pause the VM before the next instruction.
 			ClientStep, // From client: Execute one instruction, and pause before the next instruction.
 			ClientResume, // From client: Resume VM execution.
+			ServerConnected, // From server: You have been accepted.
 			ServerDisconnect, // From server: Disconnecting. Expect no more packets, and close connection immediately.
 			ServerStateChange, // From server: State has changed (no code, running, paused).
 			ServerExecutionState, // From server: Current bytecode offset, stack status.

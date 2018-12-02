@@ -7,6 +7,7 @@ using System.IO;
 
 namespace OSIProject.DebugInterop
 {
+
     // NOTE: Keep OSIProject.DebugServer/DebuggerProtocol.h in sync with this
     public enum PayloadType : ushort
     {
@@ -17,6 +18,7 @@ namespace OSIProject.DebugInterop
         ClientBreak, // From client: Pause the VM before the next instruction.
         ClientStep, // From client: Execute one instruction, and pause before the next instruction.
         ClientResume, // From client: Resume VM execution.
+        ServerConnected, // From server: You have been accepted.
         ServerDisconnect, // From server: Disconnecting. Expect no more packets, and close connection immediately.
         ServerStateChange, // From server: State has changed (no code, running, paused).
         ServerExecutionState, // From server: Current bytecode offset, stack status.
@@ -49,7 +51,7 @@ namespace OSIProject.DebugInterop
         }
     }
 
-    public class Packet
+    /*public class Packet
     {
         public PacketHeader Header { get; }
 
@@ -66,6 +68,60 @@ namespace OSIProject.DebugInterop
         public void Write(BinaryWriter writer)
         {
             this.Header.Write(writer);
+        }
+    }*/
+
+    public abstract class Payload
+    {
+        public abstract void Write(BinaryWriter writer);
+    }
+
+    public class ClientConnectionPayload : Payload
+    {
+        public const int CurrentVersionMajor = 0;
+        public const int CurrentVersionMinor = 1;
+
+        public byte VersionMajor { get; }
+        public byte VersionMinor { get; }
+
+        public ClientConnectionPayload(byte versionMajor, byte versionMinor)
+        {
+            this.VersionMajor = versionMajor;
+            this.VersionMinor = versionMinor;
+        }
+
+        public ClientConnectionPayload(BinaryReader reader)
+        {
+            this.VersionMajor = reader.ReadByte();
+            this.VersionMinor = reader.ReadByte();
+        }
+
+        public override void Write(BinaryWriter writer)
+        {
+            writer.Write(this.VersionMajor);
+            writer.Write(this.VersionMinor);
+        }
+    }
+
+    public class ServerDebugOutputPayload : Payload
+    {
+        public string Output { get; }
+
+        public ServerDebugOutputPayload(string output)
+        {
+            this.Output = output;
+        }
+
+        public ServerDebugOutputPayload(BinaryReader reader)
+        {
+            ushort length = reader.ReadUInt16();
+            Output = Encoding.ASCII.GetString(reader.ReadBytes(length));
+        }
+
+        public override void Write(BinaryWriter writer)
+        {
+            writer.Write((ushort)Output.Length);
+            writer.Write(Encoding.ASCII.GetBytes(Output));
         }
     }
 }

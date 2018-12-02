@@ -18,7 +18,7 @@ HANDLE ThreadHandle = NULL;
 DWORD ThreadID = NULL;
 
 HANDLE LaunchedEvent = NULL;
-HANDLE ConnectedEvent = NULL;
+HANDLE ConnectedEvent = NULL; // Connected *and authorized*
 HANDLE ShutdownEvent = NULL;
 HANDLE RemoteSocketMutex = NULL;
 HANDLE ListenSocketMutex = NULL;
@@ -62,13 +62,21 @@ void Debugger::Launch(const int& port) {
 	}
 	else {
 		// o no
-		OutputDebugStringW(L"Wait failure launching debugger!");
+		OutputDebugStringW(L"Wait failure launching debugger!\n");
 	}
 }
 
 bool Debugger::WaitForConnection(const int& timeoutMs) {
-	// TODO: Actually wait for the connection
-	return false;
+	OutputDebugStringW(L"Waiting for successful connection...\n");
+
+	if (WaitForSingleObject(ConnectedEvent, timeoutMs) == WAIT_OBJECT_0) {
+		OutputDebugStringW(L"Connected to debug client, continuing...\n");
+		return true;
+	}
+	else {
+		OutputDebugStringW(L"Connection to debug client not established, continuing...\n");
+		return false;
+	}
 }
 
 void Debugger::Shutdown() {
@@ -84,6 +92,11 @@ void Debugger::Shutdown() {
 		closesocket(ListenSocket);
 		ListenSocket = INVALID_SOCKET;
 		ReleaseMutex(ListenSocketMutex);
+	}
+	if (WaitForSingleObject(RemoteSocketMutex, INFINITE) == WAIT_OBJECT_0) {
+		closesocket(RemoteSocket);
+		RemoteSocket = INVALID_SOCKET;
+		ReleaseMutex(RemoteSocketMutex);
 	}
 
 	// Wait for the debugger thread to exit
@@ -148,12 +161,12 @@ void SendPacket(const PayloadType& type, const Payload& payload) {
 void HandlePacket(const PayloadType& type, const SOCKET& socket) {
 
 	if (type != PayloadType::ClientConnection && !ClientAuthorized) {
-		OutputDebugStringW(L"Client unauthorized for request!");
+		OutputDebugStringW(L"Client unauthorized for request!\n");
 		return;
 	}
 
 	if (type == PayloadType::Invalid) {
-		OutputDebugStringW(L"Invalid packet payload type!");
+		OutputDebugStringW(L"Invalid packet payload type!\n");
 		DebugBreak();
 	}
 	else if (type == PayloadType::ClientConnection) {
@@ -164,11 +177,14 @@ void HandlePacket(const PayloadType& type, const SOCKET& socket) {
 		}
 		else {
 			ClientAuthorized = true;
+			SendPacketHeader(PacketHeader{ 0, PayloadType::ServerConnected });
+			OutputDebugStringW(L"Client accepted and authorized.\n");
+			SetEvent(ConnectedEvent);
 		}
 	}
 	else if (type == PayloadType::ClientExit) {
 		// TODO: Begin the game shutdown process.
-		OutputDebugStringW(L"Remote exit is not yet supported.");
+		OutputDebugStringW(L"Remote exit is not yet supported.\n");
 	}
 	else if (type == PayloadType::ClientBreak) {
 		// TODO: Pause the VM
@@ -187,7 +203,7 @@ DWORD WINAPI DebugThread(void* data) {
 	// Set up winsock
 	int setup = WSAStartup(MAKEWORD(2, 2), &WinsockData);
 	if (setup != 0) {
-		OutputDebugStringW(L"Failed to initialize Winsock!");
+		OutputDebugStringW(L"Failed to initialize Winsock!\n");
 		DebugBreak();
 	}
 	addrinfo* pAddressInfo = nullptr;
@@ -198,24 +214,24 @@ DWORD WINAPI DebugThread(void* data) {
 	hints.ai_flags = AI_PASSIVE;
 	int search = getaddrinfo(NULL, std::to_string(DebugEnginePort).c_str(), &hints, &pAddressInfo);
 	if (search != 0) {
-		OutputDebugStringW(L"Failed to get info for listen address!");
+		OutputDebugStringW(L"Failed to get info for listen address!\n");
 		DebugBreak();
 	}
 	if (WaitForSingleObject(ListenSocketMutex, INFINITE) == WAIT_OBJECT_0) {
 		ListenSocket = socket(pAddressInfo->ai_family, pAddressInfo->ai_socktype, pAddressInfo->ai_protocol);
 		if (ListenSocket == INVALID_SOCKET) {
-			OutputDebugStringW(L"Failed to create socket for debugger connection!");
+			OutputDebugStringW(L"Failed to create socket for debugger connection!\n");
 			DebugBreak();
 		}
 		int bindResult = bind(ListenSocket, pAddressInfo->ai_addr, (int)pAddressInfo->ai_addrlen);
 		if (bindResult == SOCKET_ERROR) {
-			OutputDebugStringW(L"Failed to bind the socket for debugger connection!");
+			OutputDebugStringW(L"Failed to bind the socket for debugger connection!\n");
 			DebugBreak();
 		}
 		ReleaseMutex(ListenSocketMutex);
 	}
 	else {
-		OutputDebugStringW(L"Failed to wait for ListenSocketMutex!");
+		OutputDebugStringW(L"Failed to wait for ListenSocketMutex!\n");
 	}
 	//SOCKET listenSocket = INVALID_SOCKET;
 	freeaddrinfo(pAddressInfo);
@@ -225,7 +241,7 @@ DWORD WINAPI DebugThread(void* data) {
 
 	while (!WantsExit()) {
 		// Wait for a connection
-		OutputDebugStringW(L"Waiting for connection...");
+		OutputDebugStringW(L"Listening for connection...\n");
 		//SOCKET remoteSocket;
 		ClientAuthorized = false;
 
@@ -248,13 +264,12 @@ DWORD WINAPI DebugThread(void* data) {
 			}
 
 			SOCKET remoteSocketTemp = accept(listenSocketTemp, NULL, NULL); // We don't want to be holding RemoteSocketMutex while waiting for a connection.
-			int mutex = WaitForSingleObject(RemoteSocketMutex, INFINITE);
-			if (mutex == WAIT_OBJECT_0) {
+			//int mutex = WaitForSingleObject(RemoteSocketMutex, INFINITE);
+			if (WaitForSingleObject(RemoteSocketMutex, INFINITE) == WAIT_OBJECT_0) {
 				RemoteSocket = remoteSocketTemp;
 				if (RemoteSocket != INVALID_SOCKET) {
 					ReleaseMutex(RemoteSocketMutex);
 
-					SetEvent(ConnectedEvent);
 
 					// Read data from the connection while it is still open
 					PacketHeader nextPacketHeader = { };
@@ -262,8 +277,10 @@ DWORD WINAPI DebugThread(void* data) {
 					while (!DisconnectRemoteClient) {
 						int receive = -1;
 						if (WaitForSingleObject(RemoteSocketMutex, INFINITE) == WAIT_OBJECT_0) {
-							receive = recv(RemoteSocket, (char*)&nextPacketHeader, sizeof(PacketHeader), MSG_WAITALL);
+							remoteSocketTemp = RemoteSocket;
 							ReleaseMutex(RemoteSocketMutex);
+							receive = recv(remoteSocketTemp, (char*)&nextPacketHeader, sizeof(PacketHeader), MSG_WAITALL);
+							//receive = recv(RemoteSocket, (char*)&nextPacketHeader, sizeof(PacketHeader), 0);
 						}
 						else {
 							continue;
@@ -272,7 +289,7 @@ DWORD WINAPI DebugThread(void* data) {
 						if (receive > 0) {
 							if (nextPacketHeader.Type == PayloadType::ClientDisconnect) {
 								DisconnectRemoteClient = true;
-								OutputDebugStringW(L"Client disconnecting.");
+								OutputDebugStringW(L"Client disconnecting.\n");
 							}
 							else {
 								// Read and dispatch the payload
@@ -325,13 +342,19 @@ DWORD WINAPI DebugThread(void* data) {
 						else if (receive == 0) {
 							// Connection closed
 							DisconnectRemoteClient = true;
-							OutputDebugStringW(L"Connection closed by client.");
+							OutputDebugStringW(L"Connection closed by client.\n");
 						}
 						else {
 							// Winsock error!
 							int err = WSAGetLastError();
-							OutputDebugStringW(L"Winsock receive error!");
-							DebugBreak();
+							if (err == WSAECONNRESET) {
+								OutputDebugStringW(L"Remote forcibly closed!\n");
+							}
+							else {
+								OutputDebugStringW(L"Winsock receive error!\n");
+							}
+							//DebugBreak();
+							DisconnectRemoteClient = true;
 						}
 					}
 				}
@@ -341,13 +364,15 @@ DWORD WINAPI DebugThread(void* data) {
 				}
 			}
 			else {
-				OutputDebugStringW(L"Failed to wait on RemoteSocketMutex!");
+				OutputDebugStringW(L"Failed to wait on RemoteSocketMutex!\n");
 				DebugBreak();
 			}
 		}
 
 		if (WaitForSingleObject(RemoteSocketMutex, INFINITE) == WAIT_OBJECT_0) {
 			if (RemoteSocket != INVALID_SOCKET) {
+				SendPacketHeader(PacketHeader{ 0, PayloadType::ServerDisconnect });
+
 				closesocket(RemoteSocket);
 				RemoteSocket = INVALID_SOCKET;
 			}

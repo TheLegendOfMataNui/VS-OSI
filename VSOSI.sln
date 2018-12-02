@@ -23,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OSIProject.DebugServer", "O
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OSIProject.DebugInterop", "OSIProject.DebugInterop\OSIProject.DebugInterop.csproj", "{8FA9B771-3F73-4EB2-8982-DEB3E2C044C4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "odb", "odb\odb.csproj", "{47B99E5D-0179-4963-8AB4-5CF51D00985D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Alpha Debug|Any CPU = Alpha Debug|Any CPU
@@ -295,6 +297,42 @@ Global
 		{8FA9B771-3F73-4EB2-8982-DEB3E2C044C4}.Release|x64.Build.0 = Release|Any CPU
 		{8FA9B771-3F73-4EB2-8982-DEB3E2C044C4}.Release|x86.ActiveCfg = Release|Any CPU
 		{8FA9B771-3F73-4EB2-8982-DEB3E2C044C4}.Release|x86.Build.0 = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Alpha Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Alpha Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Alpha Debug|x64.ActiveCfg = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Alpha Debug|x64.Build.0 = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Alpha Debug|x86.ActiveCfg = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Alpha Debug|x86.Build.0 = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Alpha Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Alpha Release|Any CPU.Build.0 = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Alpha Release|x64.ActiveCfg = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Alpha Release|x64.Build.0 = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Alpha Release|x86.ActiveCfg = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Alpha Release|x86.Build.0 = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Beta Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Beta Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Beta Debug|x64.ActiveCfg = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Beta Debug|x64.Build.0 = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Beta Debug|x86.ActiveCfg = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Beta Debug|x86.Build.0 = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Beta Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Beta Release|Any CPU.Build.0 = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Beta Release|x64.ActiveCfg = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Beta Release|x64.Build.0 = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Beta Release|x86.ActiveCfg = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Beta Release|x86.Build.0 = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Debug|x64.Build.0 = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Debug|x86.Build.0 = Debug|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Release|x64.ActiveCfg = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Release|x64.Build.0 = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Release|x86.ActiveCfg = Release|Any CPU
+		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
