@@ -19,13 +19,21 @@ namespace odb
         private static int CurrentLine = 1;
         private static int CurrentColumn = 0;
 
-        private static void BetterWrite(string text)
+        private static void BetterWrite(string text, string linePrefix = "")
         {
             //Console.CursorLeft = 0;
             int prevTop = Console.CursorTop;
             int prevCol = Console.CursorLeft;
             Console.CursorTop = CurrentLine;
             Console.CursorLeft = CurrentColumn;
+            if (linePrefix?.Length > 0)
+            {
+                if (CurrentColumn == 0)
+                    text = linePrefix + text;
+                text = text.Replace("\n", "\n" + linePrefix);
+                if (text.EndsWith(linePrefix))
+                    text = text.Substring(0, text.Length - linePrefix.Length);
+            }
             Console.Write(text);
             CurrentLine = Console.CursorTop;
             CurrentColumn = Console.CursorLeft;
@@ -85,7 +93,11 @@ namespace odb
                 };
                 Connection.ServerDebugOutput += (_, output) =>
                 {
-                    BetterWrite(output);
+                    BetterWrite(output, "[VM]: ");
+                };
+                Connection.ServerException += (_, output) =>
+                {
+                    BetterWrite(output, "[VM Error]: ");
                 };
                 
                 while (!exit)

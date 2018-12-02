@@ -17,7 +17,7 @@ namespace OSIProject.DebugInterop
         public event EventHandler ServerExecutionState;
         public event EventHandler ServerStackState;
         public event EventHandler<string> ServerDebugOutput;
-        public event EventHandler ServerException;
+        public event EventHandler<string> ServerException;
 
         private object StateSyncObject = new object();
         private bool _isConnected;
@@ -111,6 +111,11 @@ namespace OSIProject.DebugInterop
             else if (header.Type == PayloadType.ServerDebugOutput)
             {
                 this.ServerDebugOutput?.Invoke(this, new ServerDebugOutputPayload(payloadReader).Output);
+            }
+            else if (header.Type == PayloadType.ServerException)
+            {
+                ServerExceptionPayload payload = new ServerExceptionPayload(payloadReader);
+                this.ServerException?.Invoke(this, payload.Output);
             }
             else
             {

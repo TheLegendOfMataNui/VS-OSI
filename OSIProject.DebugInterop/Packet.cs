@@ -124,4 +124,26 @@ namespace OSIProject.DebugInterop
             writer.Write(Encoding.ASCII.GetBytes(Output));
         }
     }
+
+    public class ServerExceptionPayload : Payload
+    {
+        public string Output { get; }
+
+        public ServerExceptionPayload(string output)
+        {
+            this.Output = output;
+        }
+
+        public ServerExceptionPayload(BinaryReader reader)
+        {
+            ushort length = reader.ReadUInt16();
+            Output = Encoding.ASCII.GetString(reader.ReadBytes(length));
+        }
+
+        public override void Write(BinaryWriter writer)
+        {
+            writer.Write((ushort)Output.Length);
+            writer.Write(Encoding.ASCII.GetBytes(Output));
+        }
+    }
 }
