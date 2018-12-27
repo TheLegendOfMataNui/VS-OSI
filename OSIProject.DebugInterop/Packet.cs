@@ -20,8 +20,8 @@ namespace OSIProject.DebugInterop
         ClientResume, // From client: Resume VM execution.
         ServerConnected, // From server: You have been accepted.
         ServerDisconnect, // From server: Disconnecting. Expect no more packets, and close connection immediately.
-        ServerStateChange, // From server: State has changed (no code, running, paused).
-        ServerExecutionState, // From server: Current bytecode offset, stack status.
+        ServerStateChange, // From server: State has changed (no code, running, paused), instruction pointer.
+        //ServerExecutionState, // From server: Current bytecode offset, stack status.
         ServerStackState, // From server: Current stack data.
         ServerDebugOutput, // From server: Debug output from OSI.
         ServerException, // From server: Exception message and details.
@@ -144,6 +144,30 @@ namespace OSIProject.DebugInterop
         {
             writer.Write((ushort)Output.Length);
             writer.Write(Encoding.ASCII.GetBytes(Output));
+        }
+    }
+
+    public class ServerStateChangePayload : Payload
+    {
+        public uint InstructionPointer;
+        public VMState.VMExecutionState ExecutionState;
+
+        public ServerStateChangePayload(uint instructionPointer, VMState.VMExecutionState executionState)
+        {
+            this.InstructionPointer = instructionPointer;
+            this.ExecutionState = executionState;
+        }
+
+        public ServerStateChangePayload(BinaryReader reader)
+        {
+            this.InstructionPointer = reader.ReadUInt32();
+            this.ExecutionState = (VMState.VMExecutionState)reader.ReadByte();
+        }
+
+        public override void Write(BinaryWriter writer)
+        {
+            writer.Write(this.InstructionPointer);
+            writer.Write((byte)this.ExecutionState);
         }
     }
 }

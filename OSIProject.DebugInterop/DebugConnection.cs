@@ -19,6 +19,9 @@ namespace OSIProject.DebugInterop
         public event EventHandler<string> ServerDebugOutput;
         public event EventHandler<string> ServerException;
 
+        public object VMSyncObject = new object();
+        public VMState VMState;
+
         private object StateSyncObject = new object();
         private bool _isConnected;
         public bool IsConnected
@@ -69,6 +72,7 @@ namespace OSIProject.DebugInterop
             this.EventContext = eventContext;
             this.Host = host;
             this.Port = port;
+            VMState = null;
         }
 
         public async Task Connect()
@@ -99,6 +103,10 @@ namespace OSIProject.DebugInterop
             if (header.Type == PayloadType.ServerConnected)
             {
                 IsConnected = true;
+                lock (VMSyncObject)
+                {
+                    VMState = new VMState();
+                }
                 ConnectedEvent.Set();
             }
             else if (header.Type == PayloadType.ServerDisconnect)
@@ -116,6 +124,13 @@ namespace OSIProject.DebugInterop
             {
                 ServerExceptionPayload payload = new ServerExceptionPayload(payloadReader);
                 this.ServerException?.Invoke(this, payload.Output);
+            }
+            else if (header.Type == PayloadType.ServerStateChange)
+            {
+                lock (VMSyncObject)
+                {
+                    VMState.OnExecutionStateChanged(this, new ServerStateChangePayload(payloadReader));
+                }
             }
             else
             {
@@ -211,10 +226,24 @@ namespace OSIProject.DebugInterop
             this.IsConnected = false;
             //this.ServerDisconnect?.Invo
             //EventContext.Send((state) => { this.ServerDisconnect?.Invoke(null, null); }, null);
+            lock (VMSyncObject)
+            {
+                VMState = null;
+            }
             this.ServerDisconnect?.Invoke(this, new EventArgs());
             this.ShutdownEvent.Set();
             ms.Dispose();
             reader.Dispose();
+        }
+
+        public void Break()
+        {
+            SendPacket(new PacketHeader(0, PayloadType.ClientBreak), null);
+        }
+
+        public void Resume()
+        {
+            SendPacket(new PacketHeader(0, PayloadType.ClientResume), null);
         }
     }
 

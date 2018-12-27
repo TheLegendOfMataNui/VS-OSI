@@ -27,6 +27,7 @@ struct CodeWarriorFunctionPointer {
 
 #if GAME_EDITION == BETA
 ScOSISystem** ScGlobalOSISystem__theOSISystem = (void**)0x0074D644;
+ScOSIVirtualMachine** GcGame__sVM = (void**)0x0083877C;
 ScOSISystem__RegisterFunction pScOSISystem__RegisterFunction = (ScOSISystem__RegisterFunction)0x005FAB30;
 ScOSIVirtualMachine__Message pScOSIVirtualMachine__Message = (ScOSIVirtualMachine__Message)0x0060BEF0;
 ScOSIVirtualMachine__Error pScOSIVirtualMachine__Error = (ScOSIVirtualMachine__Error)0x0060BE80;
@@ -37,6 +38,7 @@ bool* GcDebugOptions__sWireframe = (bool*)0x705CA8;
 bool* gCollisionBoxes = (bool*)0x705CAC;
 #elif GAME_EDITION == ALPHA
 ScOSISystem** ScGlobalOSISystem__theOSISystem = (void**)0x00630CE8;
+// TODO: GcGame__sVM, found in ScOSIVirtualMachine::call > any xref
 ScOSISystem__RegisterFunction pScOSISystem__RegisterFunction = (ScOSISystem__RegisterFunction)0x00572F90;
 ScOSIVirtualMachine__Message pScOSIVirtualMachine__Message = (ScOSIVirtualMachine__Message)0x0057D610;
 ScOSIVirtualMachine__Error pScOSIVirtualMachine__Error = (ScOSIVirtualMachine__Error)0x0057D5A0;
@@ -54,6 +56,21 @@ namespace VMInterface {
 	Event<VMEventArgs> VMOnDebugDisabled;
 	Event<VMMessageArgs> VMOnMessage;
 	Event<VMMessageArgs> VMOnError;
+	Event<VMStateArgs> VMOnStateChanged;
+
+	HANDLE VMStateMutex;
+	HANDLE VMExecuteEvent;
+
+	VMExecutionState ExecutionState = VMExecutionState::NativeCode;
+
+	void SetState(ScOSIVirtualMachine* _this, VMExecutionState executionState) {
+		if (WaitForSingleObject(VMStateMutex, INFINITE) == WAIT_OBJECT_0) {
+			ExecutionState = executionState;
+			unsigned int instructionPointer = (unsigned int)*(unsigned char**)((unsigned char**)_this + 0x7D6);
+			VMOnStateChanged.Invoke(VMStateArgs(_this, ExecutionState, instructionPointer));
+			ReleaseMutex(VMStateMutex);
+		}
+	}
 
 	// ScOSIVirtualMachine::Message
 	ScOSIVirtualMachine__Message tScOSIVritualMachine__Message = nullptr; // Trampouline
@@ -71,18 +88,47 @@ namespace VMInterface {
 	}
 
 	// ScOSIVirtualMachine::Run
+	int RunDepth = 0;
 	ScOSIVirtualMachine__Run tScOSIVirtualMachine__Run = nullptr;
 	void __fastcall mScOSIVirtualMachine__Run(ScOSIVirtualMachine* _this, void* unused) {
+		/*RunDepth++;
+		SetState(_this, VMExecutionState::OSIRunning);*/
+		if (ExecutionState != VMExecutionState::OSIRunning)
+			SetState(_this, VMExecutionState::OSIRunning);
 		bool keepRunning = true;
 		while (keepRunning) {
-			unsigned char op = **(unsigned char**)((unsigned char**)_this + 0x7D6);
-			CodeWarriorFunctionPointer instructionHandler = ScOSIVirtualMachine__handlers[op];
+			// Do a quick test to see if we are suspended
+			if (WaitForSingleObject(VMExecuteEvent, 0) == WAIT_TIMEOUT) {
+				SetState(_this, VMExecutionState::OSISuspended);
+			}
+			// Wait for permission to execute the current instruction
+			if (WaitForSingleObject(VMExecuteEvent, INFINITE) == WAIT_OBJECT_0) {
+				// We are go, now wait for permission to use the VM
+				if (WaitForSingleObject(VMStateMutex, INFINITE) == WAIT_OBJECT_0) {
+					// Try not to spam packets every single instruction
+					if (ExecutionState != VMExecutionState::OSIRunning)
+						SetState(_this, VMExecutionState::OSIRunning);
 
-			InstructionHandler handler = ScOSIVirtualMachine_vtbl[instructionHandler.OffsetIntoVtbl / 0x04];
-			DWORD result = 0;
-			result = handler(_this);
-			keepRunning = result > 0;
+					unsigned char op = **(unsigned char**)((unsigned char**)_this + 0x7D6);
+					CodeWarriorFunctionPointer instructionHandler = ScOSIVirtualMachine__handlers[op];
+
+					InstructionHandler handler = ScOSIVirtualMachine_vtbl[instructionHandler.OffsetIntoVtbl / 0x04];
+					DWORD result = 0;
+					result = handler(_this);
+					keepRunning = result > 0;
+					ReleaseMutex(VMStateMutex);
+				}
+				else {
+					OutputDebugStringW(L"[ERROR]: Modded ScOSIVirtualMachine::Run: Couldn't acquire VMStateMutex!\n");
+				}
+			}
+			else {
+				OutputDebugStringW(L"[ERROR]: Modded ScOSIVirtualMachine::Run: Couldn't wait on VMExecuteEvent!\n");
+			}
 		}
+		/*RunDepth--;
+		if (RunDepth == 0)
+			SetState(_this, VMExecutionState::NativeCode);*/
 	}
 
 	// Wireframe control
@@ -103,6 +149,9 @@ namespace VMInterface {
 	}
 
 	void InstallHooks() {
+		VMStateMutex = CreateMutex(NULL, false, NULL);
+		VMExecuteEvent = CreateEvent(NULL, true, true, NULL); // Manual reset event that starts TRUE, so execution may begin automatically
+
 		// Native function hooking
 		MH_STATUS s = MH_CreateHook(pScOSIVirtualMachine__Message, &mScOSIVirtualMachine__Message, (void**)&tScOSIVritualMachine__Message);
 		s = MH_CreateHook(pScOSIVirtualMachine__Error, &mScOSIVirtualMachine__Error, (void**)&tScOSIVirtualMachine__Error);
@@ -119,5 +168,37 @@ namespace VMInterface {
 
 	void UninstallHooks() {
 		MH_RemoveHook(pScOSIVirtualMachine__Message);
+		CloseHandle(VMStateMutex);
+		CloseHandle(VMExecuteEvent);
+	}
+
+	void Suspend() {
+		ResetEvent(VMExecuteEvent);
+	}
+
+	void Resume() {
+		SetEvent(VMExecuteEvent);
+	}
+
+	void StepOne() {
+		// TODO
+	}
+
+	void StepInto() {
+		// TODO
+	}
+
+	void StepOut() {
+		// TODO
+	}
+
+	VMExecutionState GetExecutionState() {
+		VMExecutionState result = VMExecutionState::Unknown;
+
+		if (WaitForSingleObject(VMStateMutex, INFINITE) == WAIT_OBJECT_0) {
+			result = ExecutionState;
+			ReleaseMutex(VMStateMutex);
+		}
+		return result;
 	}
 }

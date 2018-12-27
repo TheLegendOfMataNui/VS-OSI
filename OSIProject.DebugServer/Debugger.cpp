@@ -36,14 +36,17 @@ bool ClientAuthorized = false;
 WSAData WinsockData;
 
 EventHandler<VMInterface::VMMessageArgs>* VMOnMessageHandler = nullptr;
+EventHandler<VMInterface::VMStateArgs>* VMOnStateChangedHandler = nullptr;
 
 void OnVMOnMessage(const VMInterface::VMMessageArgs&);
+void OnVMOnStateChanged(const VMInterface::VMStateArgs&);
 
 void Debugger::Launch(const int& port) {
 	DebugEnginePort = port;
 
 	// Hook the VM
 	VMOnMessageHandler = VMInterface::VMOnMessage.AddHandler(OnVMOnMessage);
+	VMOnStateChangedHandler = VMInterface::VMOnStateChanged.AddHandler(OnVMOnStateChanged);
 
 	// Create the sync events
 	LaunchedEvent = CreateEventA(NULL, TRUE, FALSE, NULL);
@@ -117,6 +120,7 @@ void Debugger::Shutdown() {
 
 	// Unhook from VM
 	VMInterface::VMOnMessage.RemoveHandler(VMOnMessageHandler);
+	VMInterface::VMOnStateChanged.RemoveHandler(VMOnStateChangedHandler);
 }
 
 bool WantsExit() {
@@ -187,13 +191,13 @@ void HandlePacket(const PayloadType& type, const SOCKET& socket) {
 		OutputDebugStringW(L"Remote exit is not yet supported.\n");
 	}
 	else if (type == PayloadType::ClientBreak) {
-		// TODO: Pause the VM
+		VMInterface::Suspend();
 	}
 	else if (type == PayloadType::ClientStep) {
 		// TODO: Step the VM
 	}
 	else if (type == PayloadType::ClientResume) {
-		// TODO: Resume the VM
+		VMInterface::Resume();
 	}
 }
 
@@ -399,4 +403,8 @@ void OnVMOnMessage(const VMInterface::VMMessageArgs& args) {
 	sprintf_s((char*)msg, 2048, args.Format, args.Data);
 	uint16_t length = strlen((char*)msg);
 	SendPacket(PayloadType::ServerDebugOutput, ServerDebugOutputPayload(length, msg));
+}
+
+void OnVMOnStateChanged(const VMInterface::VMStateArgs& args) {
+	SendPacket(PayloadType::ServerStateChange, ServerStateChangePayload(args.InstructionPointer, args.ExecutionState));
 }

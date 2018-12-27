@@ -52,3 +52,25 @@ int ServerDebugOutputPayload::Write(const SOCKET& socket) const {
 uint16_t ServerDebugOutputPayload::CalcLength() const {
 	return 2 + this->OutputLength;
 }
+
+ServerStateChangePayload::ServerStateChangePayload(const uint32_t& instructionPointer, const VMInterface::VMExecutionState& executionState) {
+	this->InstructionPointer = instructionPointer;
+	this->ExecutionState = executionState;
+}
+
+ServerStateChangePayload::ServerStateChangePayload(const SOCKET& socket) {
+	SocketIO::ReadUInt32(socket, this->InstructionPointer);
+	uint8_t result;
+	SocketIO::ReadUInt8(socket, result);
+	this->ExecutionState = (VMInterface::VMExecutionState)result;
+}
+
+int ServerStateChangePayload::Write(const SOCKET& socket) const {
+	SocketIO::WriteUInt32(socket, this->InstructionPointer);
+	uint8_t value = this->ExecutionState;
+	return SocketIO::WriteUInt8(socket, value);
+}
+
+uint16_t ServerStateChangePayload::CalcLength() const {
+	return 5;
+}

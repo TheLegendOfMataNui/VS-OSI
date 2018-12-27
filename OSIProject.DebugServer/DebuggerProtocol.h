@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SocketIO.h"
+#include "VMInterface.h"
 
 #include <stdint.h>
 
@@ -20,8 +21,8 @@ namespace Debugger {
 			ClientResume, // From client: Resume VM execution.
 			ServerConnected, // From server: You have been accepted.
 			ServerDisconnect, // From server: Disconnecting. Expect no more packets, and close connection immediately.
-			ServerStateChange, // From server: State has changed (no code, running, paused).
-			ServerExecutionState, // From server: Current bytecode offset, stack status.
+			ServerStateChange, // From server: State has changed (no code, running, paused), instruction pointer.
+			//ServerExecutionState, // From server: Current bytecode offset, stack status.
 			ServerStackState, // From server: Current stack data.
 			ServerDebugOutput, // From server: Debug output from OSI.
 			ServerException, // From server: Exception message and details.
@@ -57,6 +58,16 @@ namespace Debugger {
 			ServerDebugOutputPayload(const uint16_t& outputLength, uint8_t* const& outputData);
 			ServerDebugOutputPayload(const SOCKET& socket);
 			~ServerDebugOutputPayload();
+			int Write(const SOCKET& socket) const override;
+			uint16_t CalcLength() const override;
+		};
+
+		class ServerStateChangePayload : public Payload {
+		public:
+			uint32_t InstructionPointer;
+			VMInterface::VMExecutionState ExecutionState;
+			ServerStateChangePayload(const uint32_t& instructionPointer, const VMInterface::VMExecutionState& executionState);
+			ServerStateChangePayload(const SOCKET& socket);
 			int Write(const SOCKET& socket) const override;
 			uint16_t CalcLength() const override;
 		};

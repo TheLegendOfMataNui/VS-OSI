@@ -1,5 +1,7 @@
 #pragma once
 
+#include "VMInterface.h"
+
 namespace Debugger {
 	// Creates the debugger thread and begins listening for TCP connections on the given port.
 	void Launch(const int& listenPort);
