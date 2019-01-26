@@ -126,13 +126,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\minhook\include;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\LOMNHook\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\minhook\include;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\LOMNHook\include;D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;$(IncludePath)</IncludePath>
     <LibraryPath>D:\Program Files\LEGO Media\LEGO Bionicle;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\lib\$(Configuration);$(LibraryPath)</LibraryPath>
     <OutDir>D:\Program Files\LEGO Media\LEGO Bionicle\mods\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alpha Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\minhook\include;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\LOMNHook\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\minhook\include;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\LOMNHook\include;D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;$(IncludePath)</IncludePath>
     <LibraryPath>D:\Program Files\LEGO Bionicle;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\lib\$(Configuration);$(LibraryPath)</LibraryPath>
     <OutDir>D:\Program Files\LEGO Bionicle\mods\</OutDir>
   </PropertyGroup>
@@ -148,13 +148,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\minhook\include;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\LOMNHook\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\minhook\include;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\LOMNHook\include;D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;$(IncludePath)</IncludePath>
     <LibraryPath>D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\bin\$(Configuration);D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\lib\$(Configuration);$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Configuration)\mods\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alpha Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\minhook\include;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\LOMNHook\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\minhook\include;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\LOMNHook\include;D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;$(IncludePath)</IncludePath>
     <LibraryPath>D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\bin\$(Configuration);D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\lib\$(Configuration);$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Configuration)\mods\</OutDir>
   </PropertyGroup>
@@ -309,6 +309,7 @@
     <ClInclude Include="Debugger.h" />
     <ClInclude Include="DebuggerProtocol.h" />
     <ClInclude Include="Event.h" />
+    <ClInclude Include="MoreDebugDraw.h" />
     <ClInclude Include="SocketIO.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -320,6 +321,7 @@
     <ClCompile Include="DebuggerProtocol.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Event.cpp" />
+    <ClCompile Include="MoreDebugDraw.cpp" />
     <ClCompile Include="OSIProject.DebugServer.cpp" />
     <ClCompile Include="SocketIO.cpp" />
     <ClCompile Include="stdafx.cpp">

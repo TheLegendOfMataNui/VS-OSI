@@ -1,14 +1,72 @@
 #include "stdafx.h"
 
 #include "VMInterface.h"
+#include "MoreDebugDraw.h"
 
 #include <string>
 #include <Native/ScOSIVariant.h>
 #include <Native/_ScBaseString.h>
+#include <Native/ScIdentifier.h>
 
 typedef void ScOSISystem;
 typedef unsigned short ScOSITypeID;
-typedef void ScOSIVirtualMachine;
+//typedef void ScOSIVirtualMachine;
+
+using namespace LOMNHook::Native;
+
+struct __declspec(align(4)) SxReferenceCountable
+{
+	void *vtable;
+	int count;
+};
+
+typedef ScIdentifier ScOSIToken;
+
+struct __declspec(align(4)) ScOSIScript
+{
+	void *vtable;
+	BYTE *osi_data_ptr;
+	WORD string_count;
+	BYTE *string_data_ptr;
+	char **string_ptr_array;
+	WORD global_count;
+	BYTE *global_data_ptr;
+	BYTE **global_ptr_array;
+	WORD function_count;
+	BYTE *function_data_ptr;
+	WORD class_count;
+	BYTE *class_property_data_ptr;
+	BYTE **class_table_entry_structure_ptr_array;
+	BYTE *class_method_data_ptr;
+	BYTE **class_table_entry_name_ptr;
+	WORD symbol_count;
+	BYTE *symbol_data_ptr;
+	BYTE **symbol_ptr_array;
+	BYTE unknown[396];
+	DWORD dword_468;
+	DWORD dword_472;
+	DWORD dword_476;
+	DWORD string_table_tokens_current_size;
+	ScOSIToken *string_table_tokens;
+	void *source_table_data_ptr;
+};
+
+struct __declspec(align(4)) ScOSIStack
+{
+	ScOSIVariant stack[1000];
+	WORD word_unknown;
+	ScOSIVariant *stack_ptr;
+};
+
+struct __declspec(align(4)) ScOSIVirtualMachine
+{
+	SxReferenceCountable super;
+	ScOSIScript *osi_script;
+	ScOSIStack osi_stack;
+	ScOSIVariant *unknown_variant_ptr_second_to_end__maybe_this;
+	BYTE *bytecode_ptr;
+};
+
 
 using namespace LOMNHook;
 
@@ -27,15 +85,13 @@ struct CodeWarriorFunctionPointer {
 
 #if GAME_EDITION == BETA
 ScOSISystem** ScGlobalOSISystem__theOSISystem = (void**)0x0074D644;
-ScOSIVirtualMachine** GcGame__sVM = (void**)0x0083877C;
+ScOSIVirtualMachine** GcGame__sVM = (ScOSIVirtualMachine**)0x0083877C;
 ScOSISystem__RegisterFunction pScOSISystem__RegisterFunction = (ScOSISystem__RegisterFunction)0x005FAB30;
 ScOSIVirtualMachine__Message pScOSIVirtualMachine__Message = (ScOSIVirtualMachine__Message)0x0060BEF0;
 ScOSIVirtualMachine__Error pScOSIVirtualMachine__Error = (ScOSIVirtualMachine__Error)0x0060BE80;
 CodeWarriorFunctionPointer* ScOSIVirtualMachine__handlers = (CodeWarriorFunctionPointer*)0x00752768;
 ScOSIVirtualMachine__Run pScOSIVirtualMachine__Run = (ScOSIVirtualMachine__Run)0x0060B850;
 InstructionHandler* ScOSIVirtualMachine_vtbl = (InstructionHandler*)0x007514E4;
-bool* GcDebugOptions__sWireframe = (bool*)0x705CA8;
-bool* gCollisionBoxes = (bool*)0x705CAC;
 #elif GAME_EDITION == ALPHA
 ScOSISystem** ScGlobalOSISystem__theOSISystem = (void**)0x00630CE8;
 // TODO: GcGame__sVM, found in ScOSIVirtualMachine::call > any xref
@@ -45,8 +101,6 @@ ScOSIVirtualMachine__Error pScOSIVirtualMachine__Error = (ScOSIVirtualMachine__E
 CodeWarriorFunctionPointer* ScOSIVirtualMachine__handlers = (CodeWarriorFunctionPointer*)0x00633BB8;
 ScOSIVirtualMachine__Run pScOSIVirtualMachine__Run = (ScOSIVirtualMachine__Run)0x0057CF70;
 InstructionHandler* ScOSIVirtualMachine_vtbl = (InstructionHandler*)0x00632994;
-bool* GcDebugOptions__sWireframe = (bool*)0x00610124;
-bool* gCollisionBoxes = (bool*)0x0061012C;
 #endif
 
 
@@ -109,12 +163,23 @@ namespace VMInterface {
 					if (ExecutionState != VMExecutionState::OSIRunning)
 						SetState(_this, VMExecutionState::OSIRunning);
 
-					unsigned char op = **(unsigned char**)((unsigned char**)_this + 0x7D6);
+					//unsigned char op = **(unsigned char**)((unsigned char**)_this + 0x7D6);
+					DWORD scriptOffset = (DWORD)_this->bytecode_ptr - (DWORD)_this->osi_script->osi_data_ptr;
+					unsigned char op = *_this->bytecode_ptr;
 					CodeWarriorFunctionPointer instructionHandler = ScOSIVirtualMachine__handlers[op];
 
 					InstructionHandler handler = ScOSIVirtualMachine_vtbl[instructionHandler.OffsetIntoVtbl / 0x04];
 					DWORD result = 0;
-					result = handler(_this);
+
+					__try {
+						result = handler(_this);
+					}
+					__except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
+						char buf[255];
+						sprintf_s(buf, "Exception executing OSI bytecode at offset 0x%x!!\n", scriptOffset);
+						OutputDebugStringA(buf);
+						DebugBreak();
+					}
 					keepRunning = result > 0;
 					ReleaseMutex(VMStateMutex);
 				}
@@ -148,9 +213,27 @@ namespace VMInterface {
 		return ret;
 	}
 
+	Native::ScOSIVariant* __cdecl lsdebugger_settriggerplanes(Native::ScOSIVariant* ret, ScOSIVirtualMachine* vm, void* param1, void* param2, void* param3, void* param4, void* param5, void* param6, void* param7, void* param8, void* param9, void* param10) {
+		*gTriggerPlanes = (int)param1 != 0;
+		// Return a null variant
+		ret->Payload = 0xFF;
+		ret->TypeID = Native::VARIANT_NULL;
+		return ret;
+	}
+
+	Native::ScOSIVariant* __cdecl lsdebugger_settriggerboxes(Native::ScOSIVariant* ret, ScOSIVirtualMachine* vm, void* param1, void* param2, void* param3, void* param4, void* param5, void* param6, void* param7, void* param8, void* param9, void* param10) {
+		*gTriggerBoxes = (int)param1 != 0;
+		// Return a null variant
+		ret->Payload = 0xFF;
+		ret->TypeID = Native::VARIANT_NULL;
+		return ret;
+	}
+
 	void InstallHooks() {
 		VMStateMutex = CreateMutex(NULL, false, NULL);
 		VMExecuteEvent = CreateEvent(NULL, true, true, NULL); // Manual reset event that starts TRUE, so execution may begin automatically
+
+		MDDInitialize();
 
 		// Native function hooking
 		MH_STATUS s = MH_CreateHook(pScOSIVirtualMachine__Message, &mScOSIVirtualMachine__Message, (void**)&tScOSIVritualMachine__Message);
@@ -164,12 +247,17 @@ namespace VMInterface {
 		pScOSISystem__RegisterFunction(*ScGlobalOSISystem__theOSISystem, &ns, &setWireframe, lsdebugger_setwireframe, 1, 1, Native::VARIANT_INTEGER, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF);
 		Native::_ScBaseString setCollisionBoxes = Native::_ScBaseString("setcollisionboxes");
 		pScOSISystem__RegisterFunction(*ScGlobalOSISystem__theOSISystem, &ns, &setCollisionBoxes, lsdebugger_setcollisionboxes, 1, 1, Native::VARIANT_INTEGER, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL);
+		Native::_ScBaseString setTriggerPlanes = Native::_ScBaseString("settriggerplanes");
+		pScOSISystem__RegisterFunction(*ScGlobalOSISystem__theOSISystem, &ns, &setTriggerPlanes, lsdebugger_settriggerplanes, 1, 1, Native::VARIANT_INTEGER, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL);
+		Native::_ScBaseString setTriggerBoxes = Native::_ScBaseString("settriggerboxes");
+		pScOSISystem__RegisterFunction(*ScGlobalOSISystem__theOSISystem, &ns, &setTriggerBoxes, lsdebugger_settriggerboxes, 1, 1, Native::VARIANT_INTEGER, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL);
 	}
 
 	void UninstallHooks() {
 		MH_RemoveHook(pScOSIVirtualMachine__Message);
 		CloseHandle(VMStateMutex);
 		CloseHandle(VMExecuteEvent);
+		MDDShutdown();
 	}
 
 	void Suspend() {

@@ -575,12 +575,12 @@ void ClassTracker::InstallHooks() {
 	RegisterClassMetadata("SxTypedBase", 0, 0xFFFFFFFF, 0xFFFFFFFF);
 	RegisterClassMetadata("SxTypedBase::ScClassTypeInfo", 0, 0xFFFFFFFF, 0xFFFFFFFF);
 
-	OutputDebugStringW(L"ScTypeInfo List:\n");
+	/*OutputDebugStringW(L"ScTypeInfo List:\n");
 	for (auto it = ClassMap.begin(); it != ClassMap.end(); it++) {
 		OutputDebugStringW(L"  ");
 		OutputDebugStringA(it->second->Name);
 		OutputDebugStringW(L"\n");
-	}
+	}*/
 	/*for (int i = 0; i < TypeInfoMap->ChainCount; i++) {
 		ScIdentifierMapBaseBucket* bucket = TypeInfoMap->BucketChains[i];
 

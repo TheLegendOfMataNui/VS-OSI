@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OSIProject.DebugInterop", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "odb", "odb\odb.csproj", "{47B99E5D-0179-4963-8AB4-5CF51D00985D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OSIProject.DebugEngine", "OSIProject.DebugEngine\OSIProject.DebugEngine.csproj", "{BE34DD66-2F6F-40F3-A63B-3326C688C26F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Alpha Debug|Any CPU = Alpha Debug|Any CPU
@@ -333,6 +335,42 @@ Global
 		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Release|x64.Build.0 = Release|Any CPU
 		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Release|x86.ActiveCfg = Release|Any CPU
 		{47B99E5D-0179-4963-8AB4-5CF51D00985D}.Release|x86.Build.0 = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Alpha Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Alpha Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Alpha Debug|x64.ActiveCfg = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Alpha Debug|x64.Build.0 = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Alpha Debug|x86.ActiveCfg = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Alpha Debug|x86.Build.0 = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Alpha Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Alpha Release|Any CPU.Build.0 = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Alpha Release|x64.ActiveCfg = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Alpha Release|x64.Build.0 = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Alpha Release|x86.ActiveCfg = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Alpha Release|x86.Build.0 = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Beta Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Beta Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Beta Debug|x64.ActiveCfg = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Beta Debug|x64.Build.0 = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Beta Debug|x86.ActiveCfg = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Beta Debug|x86.Build.0 = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Beta Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Beta Release|Any CPU.Build.0 = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Beta Release|x64.ActiveCfg = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Beta Release|x64.Build.0 = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Beta Release|x86.ActiveCfg = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Beta Release|x86.Build.0 = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Debug|x64.Build.0 = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Debug|x86.Build.0 = Debug|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Release|x64.ActiveCfg = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Release|x64.Build.0 = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Release|x86.ActiveCfg = Release|Any CPU
+		{BE34DD66-2F6F-40F3-A63B-3326C688C26F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
