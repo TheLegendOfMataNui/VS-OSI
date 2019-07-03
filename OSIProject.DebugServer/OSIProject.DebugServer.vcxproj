@@ -39,58 +39,58 @@
     <ProjectGuid>{1B2C925F-63D8-4339-B58E-6C016B72AF4D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>OSIProjectDebugServer</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alpha Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alpha Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alpha Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alpha Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -127,8 +127,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\minhook\include;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\LOMNHook\include;D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\Program Files\LEGO Media\LEGO Bionicle;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\lib\$(Configuration);$(LibraryPath)</LibraryPath>
-    <OutDir>D:\Program Files\LEGO Media\LEGO Bionicle\mods\</OutDir>
+    <LibraryPath>$(OutDir)..\;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMN-Beta\build\;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <OutDir>D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMN-Beta\build\mods\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alpha Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>

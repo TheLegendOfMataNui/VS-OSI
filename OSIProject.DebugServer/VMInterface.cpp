@@ -137,31 +137,50 @@ namespace VMInterface {
 	// ScOSIVirtualMachine::Error
 	ScOSIVirtualMachine__Error tScOSIVirtualMachine__Error = nullptr;
 	int mScOSIVirtualMachine__Error(void* _this, char* format, va_list args) {
+		char locationMessage[256];
+		//unsigned int instructionPointer = (unsigned int) * (unsigned char**)((unsigned char**)_this + 0x7D6);
+		unsigned int currentFileOffset = (size_t)(*GcGame__sVM)->bytecode_ptr - (size_t)(*GcGame__sVM)->osi_script->osi_data_ptr;
+		sprintf_s(locationMessage, "At offset 0x%08x\n", currentFileOffset);
+		OutputDebugStringA(locationMessage);
 		VMOnError.Invoke(VMMessageArgs(_this, format, args));
 		return tScOSIVirtualMachine__Error(_this, format, args);
 	}
 
 	// ScOSIVirtualMachine::Run
+#define CUSTOM_CORE
+//#define SETSTATE
+//#define CATCH_OSI
+//#define SYNCH
+
+#ifdef CUSTOM_CORE
 	int RunDepth = 0;
 	ScOSIVirtualMachine__Run tScOSIVirtualMachine__Run = nullptr;
 	void __fastcall mScOSIVirtualMachine__Run(ScOSIVirtualMachine* _this, void* unused) {
 		/*RunDepth++;
 		SetState(_this, VMExecutionState::OSIRunning);*/
+#ifdef SETSTATE
 		if (ExecutionState != VMExecutionState::OSIRunning)
 			SetState(_this, VMExecutionState::OSIRunning);
+#endif
 		bool keepRunning = true;
 		while (keepRunning) {
 			// Do a quick test to see if we are suspended
+#ifdef SETSTATE
 			if (WaitForSingleObject(VMExecuteEvent, 0) == WAIT_TIMEOUT) {
 				SetState(_this, VMExecutionState::OSISuspended);
 			}
+#endif
 			// Wait for permission to execute the current instruction
+#ifdef SYNCH
 			if (WaitForSingleObject(VMExecuteEvent, INFINITE) == WAIT_OBJECT_0) {
 				// We are go, now wait for permission to use the VM
 				if (WaitForSingleObject(VMStateMutex, INFINITE) == WAIT_OBJECT_0) {
+#endif
 					// Try not to spam packets every single instruction
+#ifdef SETSTATE
 					if (ExecutionState != VMExecutionState::OSIRunning)
 						SetState(_this, VMExecutionState::OSIRunning);
+#endif
 
 					//unsigned char op = **(unsigned char**)((unsigned char**)_this + 0x7D6);
 					DWORD scriptOffset = (DWORD)_this->bytecode_ptr - (DWORD)_this->osi_script->osi_data_ptr;
@@ -171,8 +190,11 @@ namespace VMInterface {
 					InstructionHandler handler = ScOSIVirtualMachine_vtbl[instructionHandler.OffsetIntoVtbl / 0x04];
 					DWORD result = 0;
 
+#ifdef CATCH_OSI
 					__try {
+#endif
 						result = handler(_this);
+#ifdef CATCH_OSI
 					}
 					__except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
 						char buf[255];
@@ -180,7 +202,9 @@ namespace VMInterface {
 						OutputDebugStringA(buf);
 						DebugBreak();
 					}
+#endif
 					keepRunning = result > 0;
+#ifdef SYNCH
 					ReleaseMutex(VMStateMutex);
 				}
 				else {
@@ -190,11 +214,13 @@ namespace VMInterface {
 			else {
 				OutputDebugStringW(L"[ERROR]: Modded ScOSIVirtualMachine::Run: Couldn't wait on VMExecuteEvent!\n");
 			}
+#endif
 		}
 		/*RunDepth--;
 		if (RunDepth == 0)
 			SetState(_this, VMExecutionState::NativeCode);*/
 	}
+#endif
 
 	// Wireframe control
 	Native::ScOSIVariant* __cdecl lsdebugger_setwireframe(Native::ScOSIVariant* ret, ScOSIVirtualMachine* vm, void* param1, void* param2, void* param3, void* param4, void* param5, void* param6, void* param7, void* param8, void* param9, void* param10) {
@@ -238,7 +264,9 @@ namespace VMInterface {
 		// Native function hooking
 		MH_STATUS s = MH_CreateHook(pScOSIVirtualMachine__Message, &mScOSIVirtualMachine__Message, (void**)&tScOSIVritualMachine__Message);
 		s = MH_CreateHook(pScOSIVirtualMachine__Error, &mScOSIVirtualMachine__Error, (void**)&tScOSIVirtualMachine__Error);
+#ifdef CUSTOM_CORE
 		s = MH_CreateHook(pScOSIVirtualMachine__Run, &mScOSIVirtualMachine__Run, (void**)&tScOSIVirtualMachine__Run);
+#endif
 		MH_EnableHook(MH_ALL_HOOKS);
 
 		// Register OSI functions
