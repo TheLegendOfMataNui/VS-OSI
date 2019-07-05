@@ -67,6 +67,22 @@ struct __declspec(align(4)) ScOSIVirtualMachine
 	BYTE *bytecode_ptr;
 };
 
+struct ScOSIArray {
+	SxReferenceCountable super;
+	DWORD unknown_vector_count_copy;
+	DWORD vector_count;
+	ScOSIVariant* data;
+};
+
+struct __declspec(align(4)) ScOSIObject
+{
+	/*SxReferenceCountable super;
+	__OSIVariantVectorData vecdata;*/
+	ScOSIArray super;
+	WORD index;
+	BYTE* osi_class_structure_ptr;
+	ScOSIScript* osi_script;
+};
 
 using namespace LOMNHook;
 
@@ -117,6 +133,139 @@ namespace VMInterface {
 
 	VMExecutionState ExecutionState = VMExecutionState::NativeCode;
 
+	void NearestSubroutineName(ScOSIVirtualMachine* vm, const size_t bytecode_ptr, char* outputBuffer, int outputBufferSize) {
+
+		char* closest_name1 = (char*)"(unknown subroutine)";
+		size_t closest_name1_length = strlen(closest_name1);
+		char* closest_name2 = (char*)"";
+		size_t closest_name2_length = strlen(closest_name2);
+		size_t closest_distance = bytecode_ptr;
+
+		// Functions
+		unsigned char* pdata = vm->osi_script->function_data_ptr;
+		for (int i = 0; i < vm->osi_script->function_count; i++) {
+			unsigned char name_length = *pdata;
+			pdata += 1;
+			char* name = (char*)pdata;
+			pdata += name_length;
+			size_t offset = *(size_t*)pdata + (size_t)vm->osi_script->osi_data_ptr;
+			pdata += 6;
+
+			if (offset < bytecode_ptr) {
+				size_t distance = bytecode_ptr - offset;
+				if (distance < closest_distance) {
+					closest_distance = distance;
+					closest_name1 = name;
+					closest_name1_length = name_length;
+				}
+			}
+		}
+
+		// Methods
+		for (int i = 0; i < vm->osi_script->class_count; i++) {
+			pdata = vm->osi_script->class_table_entry_name_ptr[i];
+			unsigned char name_length = *pdata;
+			pdata += 1;
+			char* name = (char*)pdata;
+
+			pdata = vm->osi_script->class_table_entry_structure_ptr_array[i];
+			unsigned char propertyCount = *pdata;
+			pdata += 1 + propertyCount * 2;
+			unsigned char methodCount = *pdata;
+			pdata += 1;
+			for (int j = 0; j < methodCount; j++) {
+				unsigned short nameSymbol = *(unsigned short*)pdata;
+				pdata += 2;
+				size_t offset = *(size_t*)pdata + (size_t)vm->osi_script->osi_data_ptr;
+				pdata += 4;
+
+				if (offset < bytecode_ptr) {
+					size_t distance = bytecode_ptr - offset;
+					if (distance < closest_distance) {
+						closest_distance = distance;
+						closest_name1 = name;
+						closest_name1_length = name_length;
+						closest_name2_length = *vm->osi_script->symbol_ptr_array[nameSymbol];
+						closest_name2 = (char*)(vm->osi_script->symbol_ptr_array[nameSymbol] + 1);
+					}
+				}
+			}
+		}
+
+		if (closest_name2_length > 0) {
+			sprintf_s(outputBuffer, outputBufferSize, "%.*s.%.*s", closest_name1_length, closest_name1, closest_name2_length, closest_name2);
+		}
+		else {
+			sprintf_s(outputBuffer, outputBufferSize, "%.*s", closest_name1_length, closest_name1);
+		}
+	}
+
+	void OutputDebugVariant(const ScOSIVariant& variant, ScOSIVirtualMachine* vm) {
+		wchar_t data[100];
+
+		if (variant.TypeID == Native::VARIANT_OBJECT) {
+			unsigned short classIndex = ((ScOSIObject*)variant.Payload)->index;
+			unsigned char classNameLength = *vm->osi_script->class_table_entry_name_ptr[classIndex];
+			char* className = (char*)(vm->osi_script->class_table_entry_name_ptr[classIndex] + 1);
+			swprintf_s(data, L"       [ %.*S Instance ]\n", classNameLength, className);
+		}
+		else if (variant.TypeID == Native::VARIANT_RETURN_ADDRESS) {
+			size_t offset = variant.Payload - (size_t)vm->osi_script->osi_data_ptr;
+			char name[100];
+			NearestSubroutineName(vm, variant.Payload, name, 100);
+			swprintf_s(data, L"\n   [ 0x%08x \"%S\" ]\n", offset, name);
+		}
+		else if (variant.TypeID == Native::VARIANT_ARRAY) {
+			swprintf_s(data, L"       [ Array[%d] ]\n", ((ScOSIArray*)variant.Payload)->vector_count);
+		}
+		else if (variant.TypeID == Native::VARIANT_NULL) {
+			swprintf_s(data, L"       [ Null ]\n");
+		}
+		else if (variant.TypeID == Native::VARIANT_INTEGER) {
+			swprintf_s(data, L"       [ %d (Integer) ]\n", *(int*)& variant.Payload);
+		}
+		else if (variant.TypeID == Native::VARIANT_STRINGCONSTANT) {
+			char* contents = vm->osi_script->string_ptr_array[variant.Payload] + 1;
+			swprintf_s(data, L"       [ \"%S\" (Constant String) ]\n", contents);
+		}
+		else if (variant.TypeID == Native::VARIANT_FLOAT) {
+			swprintf_s(data, L"       [ %f (Float) ]\n", *(float*)& variant.Payload);
+		}
+		else if (variant.TypeID == Native::VARIANT_STRINGTABLE) {
+			swprintf_s(data, L"       [ ??? (Table String) ]\n");
+		}
+		else if (variant.TypeID == Native::VARIANT_COLOR5551) {
+			swprintf_s(data, L"       [ ??? (5551 Color) ]\n");
+		}
+		else if (variant.TypeID == Native::VARIANT_COLOR8888) {
+			swprintf_s(data, L"       [ ??? (Color) ]\n");
+		}
+		else if (variant.TypeID >= Native::VARIANT_NATIVECLASSBEGIN
+			&& variant.TypeID <= Native::VARIANT_NATIVECLASSEND) {
+			swprintf_s(data, L"       [ ??? (0x%x: Native Instance) ]\n", variant.TypeID);
+
+		}
+		else if (variant.TypeID == 255) {
+			swprintf_s(data, L"   [ Bottom of Stack ]\n");
+		}
+		else {
+			swprintf_s(data, L"       [ ??? (0x%x: ???) ]\n", variant.TypeID);
+		}
+
+		OutputDebugStringW(data);
+	}
+
+	void OutputDebugStack(ScOSIVirtualMachine* vm) {
+		char current_subroutine[100];
+		char sub_name[100];
+		NearestSubroutineName(vm, (size_t)vm->bytecode_ptr, sub_name, 100);
+		sprintf_s(current_subroutine, "    [ 0x%08x \"%s\" (Current Subroutine) ]\n", (size_t)vm->bytecode_ptr - (size_t)vm->osi_script->osi_data_ptr, sub_name);
+		OutputDebugStringA(current_subroutine);
+		for (ScOSIVariant* variant = vm->osi_stack.stack_ptr; (size_t)variant >= (size_t)& vm->osi_stack.stack; variant--) {
+			OutputDebugVariant(*variant, vm);
+		}
+	}
+
 	void SetState(ScOSIVirtualMachine* _this, VMExecutionState executionState) {
 		if (WaitForSingleObject(VMStateMutex, INFINITE) == WAIT_OBJECT_0) {
 			ExecutionState = executionState;
@@ -137,19 +286,15 @@ namespace VMInterface {
 	// ScOSIVirtualMachine::Error
 	ScOSIVirtualMachine__Error tScOSIVirtualMachine__Error = nullptr;
 	int mScOSIVirtualMachine__Error(void* _this, char* format, va_list args) {
-		char locationMessage[256];
-		//unsigned int instructionPointer = (unsigned int) * (unsigned char**)((unsigned char**)_this + 0x7D6);
-		unsigned int currentFileOffset = (size_t)(*GcGame__sVM)->bytecode_ptr - (size_t)(*GcGame__sVM)->osi_script->osi_data_ptr;
-		sprintf_s(locationMessage, "At offset 0x%08x\n", currentFileOffset);
-		OutputDebugStringA(locationMessage);
 		VMOnError.Invoke(VMMessageArgs(_this, format, args));
+        OutputDebugStack((ScOSIVirtualMachine*)_this);
 		return tScOSIVirtualMachine__Error(_this, format, args);
 	}
 
 	// ScOSIVirtualMachine::Run
 #define CUSTOM_CORE
 //#define SETSTATE
-//#define CATCH_OSI
+#define CATCH_OSI
 //#define SYNCH
 
 #ifdef CUSTOM_CORE
@@ -197,9 +342,8 @@ namespace VMInterface {
 #ifdef CATCH_OSI
 					}
 					__except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
-						char buf[255];
-						sprintf_s(buf, "Exception executing OSI bytecode at offset 0x%x!!\n", scriptOffset);
-						OutputDebugStringA(buf);
+						OutputDebugStringW(L"VM CRASH:\n");
+                        OutputDebugStack(_this);
 						DebugBreak();
 					}
 #endif
@@ -255,6 +399,15 @@ namespace VMInterface {
 		return ret;
 	}
 
+	Native::ScOSIVariant* __cdecl lsdebugger_printstack(Native::ScOSIVariant* ret, ScOSIVirtualMachine* vm, void* param1, void* param2, void* param3, void* param4, void* param5, void* param6, void* param7, void* param8, void* param9, void* param10) {
+		OutputDebugStack(vm);
+
+		// Return a null variant
+		ret->Payload = 0xFF;
+		ret->TypeID = Native::VARIANT_NULL;
+		return ret;
+	}
+
 	void InstallHooks() {
 		VMStateMutex = CreateMutex(NULL, false, NULL);
 		VMExecuteEvent = CreateEvent(NULL, true, true, NULL); // Manual reset event that starts TRUE, so execution may begin automatically
@@ -279,6 +432,8 @@ namespace VMInterface {
 		pScOSISystem__RegisterFunction(*ScGlobalOSISystem__theOSISystem, &ns, &setTriggerPlanes, lsdebugger_settriggerplanes, 1, 1, Native::VARIANT_INTEGER, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL);
 		Native::_ScBaseString setTriggerBoxes = Native::_ScBaseString("settriggerboxes");
 		pScOSISystem__RegisterFunction(*ScGlobalOSISystem__theOSISystem, &ns, &setTriggerBoxes, lsdebugger_settriggerboxes, 1, 1, Native::VARIANT_INTEGER, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL);
+		Native::_ScBaseString printStack = Native::_ScBaseString("printstack");
+		pScOSISystem__RegisterFunction(*ScGlobalOSISystem__theOSISystem, &ns, &printStack, lsdebugger_printstack, 0, 0, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL, Native::VARIANT_NULL);
 	}
 
 	void UninstallHooks() {
