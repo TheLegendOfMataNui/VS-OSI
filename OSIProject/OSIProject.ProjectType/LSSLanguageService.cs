@@ -146,6 +146,112 @@ namespace OSIProject
             }
         }
 
+        [Export(typeof(ITaggerProvider))]
+        [TagType(typeof(IOutliningRegionTag))]
+        [ContentType("lss")]
+        internal sealed class OutliningTaggerProvider : ITaggerProvider
+        {
+            public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
+            {
+                Func<ITagger<T>> sc = delegate () { return new OutliningTagger(buffer) as ITagger<T>; };
+                return buffer.Properties.GetOrCreateSingletonProperty(sc);
+            }
+        }
+
+        internal sealed class OutliningTagger : ITagger<IOutliningRegionTag>
+        {
+            private class FoldRegion
+            {
+                public int StartIndex;
+                public int Length;
+                public string CollapsedText;
+                public string TooltipText;
+
+                public FoldRegion(int startIndex, int length, string collapsedText, string tooltipText)
+                {
+                    this.StartIndex = startIndex;
+                    this.Length = length;
+                    this.CollapsedText = collapsedText;
+                    this.TooltipText = tooltipText;
+                }
+            }
+
+            private ITextBuffer Buffer;
+            private ITextSnapshot Snapshot;
+
+            private List<FoldRegion> Regions = new List<FoldRegion>();
+            //private Dictionary<int, int> LineBraceCounts = new Dictionary<int, int>();
+
+            public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
+
+            public OutliningTagger(ITextBuffer buffer)
+            {
+                Buffer = buffer;
+                Snapshot = Buffer.CurrentSnapshot;
+                this.Buffer.Changed += Buffer_Changed;
+                //Parse(new Span(0, Snapshot.Length));
+                Apply();
+            }
+
+            public IEnumerable<ITagSpan<IOutliningRegionTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+            {
+                List<ITagSpan<IOutliningRegionTag>> results = new List<ITagSpan<IOutliningRegionTag>>();
+                foreach (FoldRegion region in Regions)
+                    //foreach (SnapshotSpan span in spans)
+                        //if (span.OverlapsWith(new SnapshotSpan(Snapshot, region.StartIndex, region.Length)))
+                        //{
+                            //yield return new TagSpan<IOutliningRegionTag>(new SnapshotSpan(Snapshot, region.StartIndex, region.Length), new OutliningRegionTag(false, true, region.CollapsedText, region.TooltipText));
+                            results.Add(new TagSpan<IOutliningRegionTag>(new SnapshotSpan(Snapshot, region.StartIndex, region.Length), new OutliningRegionTag(false, true, region.CollapsedText, null)));
+                            //break;
+                        //}
+                return results;
+            }
+
+            private void Apply()
+            {
+                Regions.Clear();
+
+                List<SAGESharp.LSS.Token> tokens = SAGESharp.LSS.Scanner.Scan(Snapshot.GetText(), "", new List<SyntaxError>(), true, true);
+
+                Stack<SAGESharp.LSS.Token> stack = new Stack<SAGESharp.LSS.Token>();
+
+                foreach (SAGESharp.LSS.Token token in tokens)
+                {
+                    if (token.Type == SAGESharp.LSS.TokenType.OpenBrace)
+                    {
+                        stack.Push(token);
+                    }
+                    else if (token.Type == SAGESharp.LSS.TokenType.CloseBrace && stack.Count > 0)
+                    {
+                        SAGESharp.LSS.Token start = stack.Pop();
+                        Regions.Add(new FoldRegion((int)start.Span.Start.Offset, (int)(token.Span.End - start.Span.Start.Offset), "...", ""));
+                    }
+                }
+
+                Regions.Reverse();
+
+                this.TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(Snapshot, new Span(0, Snapshot.Length))));
+            }
+
+            private void Buffer_Changed(object sender, TextContentChangedEventArgs e)
+            {
+                /*if (e.Changes.Count == 0)
+                    return;
+                //throw new NotImplementedException();
+                Snapshot = e.After;
+                foreach (ITextChange change in e.Changes)
+                {
+                    if (change.OldText.Count(c => c == '{') != change.NewText.Count(c => c == '{')
+                        || change.OldText.Count(c => c == '}') != change.NewText.Count(c => c == '}'))
+                    {
+                        Apply();
+                        return;
+                    }
+                }*/
+            }
+
+        }
+
         /// <summary>
         /// Returns a Span that completely contains both span1 and span2.
         /// </summary>
