@@ -197,13 +197,19 @@ namespace OSIProject
             {
                 List<ITagSpan<IOutliningRegionTag>> results = new List<ITagSpan<IOutliningRegionTag>>();
                 foreach (FoldRegion region in Regions)
+                {
                     //foreach (SnapshotSpan span in spans)
                         //if (span.OverlapsWith(new SnapshotSpan(Snapshot, region.StartIndex, region.Length)))
                         //{
                             //yield return new TagSpan<IOutliningRegionTag>(new SnapshotSpan(Snapshot, region.StartIndex, region.Length), new OutliningRegionTag(false, true, region.CollapsedText, region.TooltipText));
-                            results.Add(new TagSpan<IOutliningRegionTag>(new SnapshotSpan(Snapshot, region.StartIndex, region.Length), new OutliningRegionTag(false, true, region.CollapsedText, null)));
-                            //break;
+                            if (region.StartIndex < Snapshot.Length && region.StartIndex + region.Length <= Snapshot.Length)
+                            {
+                                results.Add(new TagSpan<IOutliningRegionTag>(new SnapshotSpan(Snapshot, region.StartIndex, region.Length), new OutliningRegionTag(false, true, region.CollapsedText, null)));
+                                //break;
+                            }
                         //}
+
+                }
                 return results;
             }
 
@@ -235,11 +241,12 @@ namespace OSIProject
 
             private void Buffer_Changed(object sender, TextContentChangedEventArgs e)
             {
-                /*if (e.Changes.Count == 0)
+                if (e.Changes.Count == 0)
                     return;
                 //throw new NotImplementedException();
                 Snapshot = e.After;
-                foreach (ITextChange change in e.Changes)
+                Apply();
+                /*foreach (ITextChange change in e.Changes)
                 {
                     if (change.OldText.Count(c => c == '{') != change.NewText.Count(c => c == '{')
                         || change.OldText.Count(c => c == '}') != change.NewText.Count(c => c == '}'))
