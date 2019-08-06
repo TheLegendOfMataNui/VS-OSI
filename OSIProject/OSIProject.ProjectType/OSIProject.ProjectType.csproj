@@ -288,6 +288,6 @@
   <PropertyGroup>
     <PostBuildEvent>cd "$(SolutionDir)"
 xcopy "$(LocalAppData)\CustomProjectSystems\OSIProject" "$(MSBuildProgramFiles32)\Litestone\SAGE-JS MSBuild Support\OSIProject" /y /s
-"$(ProgramFiles)\Inno Setup 5\ISCC.exe" /O"Installer\$(Configuration)" /DConfiguration=$(Configuration) "Installer.iss"</PostBuildEvent>
+iscc.exe /O"Installer\$(Configuration)" /DConfiguration=$(Configuration) "Installer.iss"</PostBuildEvent>
   </PropertyGroup>
 </Project>

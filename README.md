@@ -22,7 +22,7 @@ Goals
 Project Overview
 ----------------
 
-`Installer.iss` - An installer script that is compiled by [Inno Setup](http://www.jrsoftware.org/isinfo.php) into the `Output/` directory upon build. Requires Inno Setup to be installed. An installer is necessary for installing the MSBuild task.
+`Installer.iss` - An installer script that is compiled by [Inno Setup](http://www.jrsoftware.org/isinfo.php) into the `Output/` directory upon build. Requires Inno Setup to be installed *AND ON THE `PATH`* (the Inno Setup installer doesn't do this for you!) An installer is necessary for installing the MSBuild task, although we are migrating away from using project files with MSBuild.
 
 `OSIProject.Language` - The details of OSI stuff. `OSIAssembly.cs` for OSI Assembly (lexing, tokens, and keywords), and maybe later an `OSIFile.cs` for the actual packed `.osi` format.
 
