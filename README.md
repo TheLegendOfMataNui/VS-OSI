@@ -19,6 +19,12 @@ Goals
    - [ ] Step one instruction
    - [ ] Browse & modify VM state
 
+Dependencies
+------------
+
+Place this repo next to the [LOMNHook repo](https://github.com/TheLegendOfMataNui/LOMNHook)
+Install the August 2007 DIrectX SDK, and update the include path in OSIProject.DebugServer's properties
+
 Project Overview
 ----------------
 

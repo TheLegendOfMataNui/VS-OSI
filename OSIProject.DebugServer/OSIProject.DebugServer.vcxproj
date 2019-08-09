@@ -126,9 +126,9 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\minhook\include;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\LOMNHook\include;D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(OutDir)..\;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMN-Beta\build\;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\lib\$(Configuration);$(LibraryPath)</LibraryPath>
-    <OutDir>D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMN-Beta\build\mods\</OutDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)..\LOMNHook\minhook\include;$(SolutionDir)..\LOMNHook\LOMNHook\include;E:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir)..\;$(SolutionDir)..\LOMN-Beta\build\;$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)..\LOMN-Beta\build\mods\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alpha Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -148,8 +148,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\minhook\include;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\LOMNHook\include;D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\bin\$(Configuration);D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)..\LOMNHook\minhook\include;$(SolutionDir)..\LOMNHook\LOMNHook\include;E:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir)..\;$(SolutionDir)..\LOMN-Beta\build\;$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Configuration)\mods\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alpha Release|Win32'">
