@@ -4,6 +4,7 @@
 #include "MoreDebugDraw.h"
 
 #include <string>
+#include <stdarg.h>
 #include <Native/ScOSIVariant.h>
 #include <Native/_ScBaseString.h>
 #include <Native/ScIdentifier.h>
@@ -92,6 +93,7 @@ typedef int(*ScOSIVirtualMachine__Message)(void*, char*, va_list);
 typedef int(*ScOSIVirtualMachine__Error)(void*, char*, va_list);
 typedef bool(__thiscall *InstructionHandler)(ScOSIVirtualMachine*);
 typedef void(__fastcall *ScOSIVirtualMachine__Run)(void*, void*);
+typedef void(*SrOSIError)(const Native::_ScBaseString*, ...);
 
 struct CodeWarriorFunctionPointer {
 	DWORD ClassOffset;
@@ -108,6 +110,7 @@ ScOSIVirtualMachine__Error pScOSIVirtualMachine__Error = (ScOSIVirtualMachine__E
 CodeWarriorFunctionPointer* ScOSIVirtualMachine__handlers = (CodeWarriorFunctionPointer*)0x00752768;
 ScOSIVirtualMachine__Run pScOSIVirtualMachine__Run = (ScOSIVirtualMachine__Run)0x0060B850;
 InstructionHandler* ScOSIVirtualMachine_vtbl = (InstructionHandler*)0x007514E4;
+SrOSIError pSrOSIError = (SrOSIError)0x005FAEE0;
 #elif GAME_EDITION == ALPHA
 ScOSISystem** ScGlobalOSISystem__theOSISystem = (void**)0x00630CE8;
 // TODO: GcGame__sVM, found in ScOSIVirtualMachine::call > any xref
@@ -285,10 +288,34 @@ namespace VMInterface {
 
 	// ScOSIVirtualMachine::Error
 	ScOSIVirtualMachine__Error tScOSIVirtualMachine__Error = nullptr;
+	bool inVMError = false;
 	int mScOSIVirtualMachine__Error(void* _this, char* format, va_list args) {
 		VMOnError.Invoke(VMMessageArgs(_this, format, args));
         OutputDebugStack((ScOSIVirtualMachine*)_this);
-		return tScOSIVirtualMachine__Error(_this, format, args);
+		inVMError = true;
+		int result = tScOSIVirtualMachine__Error(_this, format, args);
+		inVMError = false;
+		return result;
+	}
+
+	// SrOSIError
+	SrOSIError tSrOSIError = nullptr;
+	void mSrOSIError(const Native::_ScBaseString* format, ...) {
+		if (inVMError) {
+			return tSrOSIError(format);
+		}
+		else {
+
+			va_list args;
+			va_start(args, format);
+
+			VMOnError.Invoke(VMMessageArgs((void*)*GcGame__sVM, (char*)format->Data, args));
+			OutputDebugStack(*GcGame__sVM);
+
+			va_end(args);
+
+			return tSrOSIError(format);
+		}
 	}
 
 	// ScOSIVirtualMachine::Run
@@ -417,6 +444,7 @@ namespace VMInterface {
 		// Native function hooking
 		MH_STATUS s = MH_CreateHook(pScOSIVirtualMachine__Message, &mScOSIVirtualMachine__Message, (void**)&tScOSIVritualMachine__Message);
 		s = MH_CreateHook(pScOSIVirtualMachine__Error, &mScOSIVirtualMachine__Error, (void**)&tScOSIVirtualMachine__Error);
+		s = MH_CreateHook(pSrOSIError, &mSrOSIError, (void**)&tSrOSIError);
 #ifdef CUSTOM_CORE
 		s = MH_CreateHook(pScOSIVirtualMachine__Run, &mScOSIVirtualMachine__Run, (void**)&tScOSIVirtualMachine__Run);
 #endif
