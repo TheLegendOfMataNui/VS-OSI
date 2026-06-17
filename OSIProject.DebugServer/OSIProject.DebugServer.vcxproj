@@ -126,15 +126,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)..\LOMNHook\minhook\include;$(SolutionDir)..\LOMNHook\LOMNHook\include;E:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(OutDir)..\;$(SolutionDir)..\LOMN-Beta\build\;$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)..\LOMN-Beta\build\mods\</OutDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)..\LOMNHook\minhook\include;$(SolutionDir)..\LOMNHook\LOMNHook\include;D:\Program Files (x86)\Microsoft DirectX SDK (August 2007)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\LOMN-Beta-Rebuilt\build;$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <OutDir>..\..\LOMN-Rebuilt\build\mods</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alpha Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\minhook\include;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\LOMNHook\include;D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\Program Files\LEGO Bionicle;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\lib\$(Configuration);$(LibraryPath)</LibraryPath>
-    <OutDir>D:\Program Files\LEGO Bionicle\mods\</OutDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)..\LOMNHook\minhook\include;$(SolutionDir)..\LOMNHook\LOMNHook\include;D:\Program Files (x86)\Microsoft DirectX SDK (August 2007)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\LOMN-Alpha\build;$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <OutDir>..\..\LOMN-Alpha\build\mods\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -148,15 +148,16 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)..\LOMNHook\minhook\include;$(SolutionDir)..\LOMNHook\LOMNHook\include;E:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(OutDir)..\;$(SolutionDir)..\LOMN-Beta\build\;$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)bin\$(Configuration)\mods\</OutDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)..\LOMNHook\minhook\include;$(SolutionDir)..\LOMNHook\LOMNHook\include;D:\Program Files (x86)\Microsoft DirectX SDK (August 2007)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\LOMNHook\bin\$(Configuration);$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)..\LOMNHook\bin\$(Configuration)\mods\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alpha Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\minhook\include;D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\LOMNHook\include;D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\bin\$(Configuration);D:\codemastrben\Documents\Projects\Modding\Bionicle\My Code\LOMNAPI\lib\$(Configuration);$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)bin\$(Configuration)\mods\</OutDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)..\LOMNHook\minhook\include;$(SolutionDir)..\LOMNHook\LOMNHook\include;D:\Program Files (x86)\Microsoft DirectX SDK (August 2007)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\LOMNHook\bin\$(Configuration);$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)..\LOMNHook\bin\$(Configuration)\mods\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -176,11 +177,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;GAME_EDITION=BETA;OSIPROJECTDEBUGSERVER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ijl15.lib;libMinHook.$(ProcessorArchitecture).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\LOMN-Rebuilt\build\ijl15.lib;libMinHook.$(ProcessorArchitecture).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Alpha Debug|Win32'">
@@ -191,6 +193,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;GAME_EDITION=ALPHA;OSIPROJECTDEBUGSERVER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -238,6 +241,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;GAME_EDITION=BETA;NDEBUG;OSIPROJECTDEBUGSERVER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -257,6 +261,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;GAME_EDITION=ALPHA;NDEBUG;OSIPROJECTDEBUGSERVER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -276,6 +281,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;OSIPROJECTDEBUGSERVER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

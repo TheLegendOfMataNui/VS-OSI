@@ -102,24 +102,25 @@ struct CodeWarriorFunctionPointer {
 };
 
 #if GAME_EDITION == BETA
-ScOSISystem** ScGlobalOSISystem__theOSISystem = (void**)0x0074D644;
-ScOSIVirtualMachine** GcGame__sVM = (ScOSIVirtualMachine**)0x0083877C;
-ScOSISystem__RegisterFunction pScOSISystem__RegisterFunction = (ScOSISystem__RegisterFunction)0x005FAB30;
-ScOSIVirtualMachine__Message pScOSIVirtualMachine__Message = (ScOSIVirtualMachine__Message)0x0060BEF0;
-ScOSIVirtualMachine__Error pScOSIVirtualMachine__Error = (ScOSIVirtualMachine__Error)0x0060BE80;
-CodeWarriorFunctionPointer* ScOSIVirtualMachine__handlers = (CodeWarriorFunctionPointer*)0x00752768;
-ScOSIVirtualMachine__Run pScOSIVirtualMachine__Run = (ScOSIVirtualMachine__Run)0x0060B850;
-InstructionHandler* ScOSIVirtualMachine_vtbl = (InstructionHandler*)0x007514E4;
-SrOSIError pSrOSIError = (SrOSIError)0x005FAEE0;
+	ScOSISystem** ScGlobalOSISystem__theOSISystem = (void**)0x0074D644;
+	ScOSIVirtualMachine** GcGame__sVM = (ScOSIVirtualMachine**)0x0083877C;
+	ScOSISystem__RegisterFunction pScOSISystem__RegisterFunction = (ScOSISystem__RegisterFunction)0x005FAB30;
+	ScOSIVirtualMachine__Message pScOSIVirtualMachine__Message = (ScOSIVirtualMachine__Message)0x0060BEF0;
+	ScOSIVirtualMachine__Error pScOSIVirtualMachine__Error = (ScOSIVirtualMachine__Error)0x0060BE80;
+	CodeWarriorFunctionPointer* ScOSIVirtualMachine__handlers = (CodeWarriorFunctionPointer*)0x00752768;
+	ScOSIVirtualMachine__Run pScOSIVirtualMachine__Run = (ScOSIVirtualMachine__Run)0x0060B850;
+	InstructionHandler* ScOSIVirtualMachine_vtbl = (InstructionHandler*)0x007514E4;
+	SrOSIError pSrOSIError = (SrOSIError)0x005FAEE0;
 #elif GAME_EDITION == ALPHA
-ScOSISystem** ScGlobalOSISystem__theOSISystem = (void**)0x00630CE8;
-// TODO: GcGame__sVM, found in ScOSIVirtualMachine::call > any xref
-ScOSISystem__RegisterFunction pScOSISystem__RegisterFunction = (ScOSISystem__RegisterFunction)0x00572F90;
-ScOSIVirtualMachine__Message pScOSIVirtualMachine__Message = (ScOSIVirtualMachine__Message)0x0057D610;
-ScOSIVirtualMachine__Error pScOSIVirtualMachine__Error = (ScOSIVirtualMachine__Error)0x0057D5A0;
-CodeWarriorFunctionPointer* ScOSIVirtualMachine__handlers = (CodeWarriorFunctionPointer*)0x00633BB8;
-ScOSIVirtualMachine__Run pScOSIVirtualMachine__Run = (ScOSIVirtualMachine__Run)0x0057CF70;
-InstructionHandler* ScOSIVirtualMachine_vtbl = (InstructionHandler*)0x00632994;
+	ScOSISystem** ScGlobalOSISystem__theOSISystem = (void**)0x00630CE8;
+	ScOSIVirtualMachine** GcGame__sVM = (ScOSIVirtualMachine**)0x0069B238;
+	ScOSISystem__RegisterFunction pScOSISystem__RegisterFunction = (ScOSISystem__RegisterFunction)0x00572F90;
+	ScOSIVirtualMachine__Message pScOSIVirtualMachine__Message = (ScOSIVirtualMachine__Message)0x0057D610;
+	ScOSIVirtualMachine__Error pScOSIVirtualMachine__Error = (ScOSIVirtualMachine__Error)0x0057D5A0;
+	CodeWarriorFunctionPointer* ScOSIVirtualMachine__handlers = (CodeWarriorFunctionPointer*)0x00633BB8;
+	ScOSIVirtualMachine__Run pScOSIVirtualMachine__Run = (ScOSIVirtualMachine__Run)0x0057CF70;
+	InstructionHandler* ScOSIVirtualMachine_vtbl = (InstructionHandler*)0x00632994;
+	SrOSIError pSrOSIError = (SrOSIError)0x00573340;
 #endif
 
 

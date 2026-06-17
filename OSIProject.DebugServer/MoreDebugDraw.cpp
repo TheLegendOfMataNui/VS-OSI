@@ -162,20 +162,27 @@ bool* gTriggerPlanes = &DrawTriggerPlanes;
 bool* gTriggerBoxes = &DrawTriggerBoxes;
 
 #if GAME_EDITION == BETA
-bool* GcDebugOptions__sWireframe = (bool*)0x705CA8;
-bool* gCollisionBoxes = (bool*)0x705CAC;
-//ScTriggerManager__ProcessTriggers pScTriggerManager__ProcessTriggers = (ScTriggerManager__ProcessTriggers)0x004C2BF0;
-ScRenderer__DrawLines pScRenderer__DrawLines = (ScRenderer__DrawLines)0x00530D50;
-GcArea__Render pGcArea__Render = (GcArea__Render)0x00505840;
-GcBoundingPoly__Render pGcBoundingPoly__Render = (GcBoundingPoly__Render)0x00431950;
-Vector<_GcTriggerPlaneStruct>* pGcCollisionPhysicsGroup__sTriggerPlanes = (Vector<_GcTriggerPlaneStruct>*)0x0083B004;
-Vector<_GcTriggerPlaneStruct>* pGcCollisionPhysicsGroup__sLockedOutTriggerPlanes = (Vector<_GcTriggerPlaneStruct>*)0x008390C8;
-Vector<_GcTriggerBox>* pGcCollisionPhysicsGroup__sTriggerBoxes = (Vector<_GcTriggerBox>*)0x0083B33C;
-Vector<_GcTriggerBox>* pGcCollisionPhysicsGroup__sLockedOutTriggerBoxes = (Vector<_GcTriggerBox>*)0x00839030;
+	bool* GcDebugOptions__sWireframe = (bool*)0x705CA8;
+	bool* gCollisionBoxes = (bool*)0x705CAC;
+	//ScTriggerManager__ProcessTriggers pScTriggerManager__ProcessTriggers = (ScTriggerManager__ProcessTriggers)0x004C2BF0;
+	ScRenderer__DrawLines pScRenderer__DrawLines = (ScRenderer__DrawLines)0x00530D50;
+	GcArea__Render pGcArea__Render = (GcArea__Render)0x00505840;
+	GcBoundingPoly__Render pGcBoundingPoly__Render = (GcBoundingPoly__Render)0x00431950;
+	Vector<_GcTriggerPlaneStruct>* pGcCollisionPhysicsGroup__sTriggerPlanes = (Vector<_GcTriggerPlaneStruct>*)0x0083B004;
+	Vector<_GcTriggerPlaneStruct>* pGcCollisionPhysicsGroup__sLockedOutTriggerPlanes = (Vector<_GcTriggerPlaneStruct>*)0x008390C8;
+	Vector<_GcTriggerBox>* pGcCollisionPhysicsGroup__sTriggerBoxes = (Vector<_GcTriggerBox>*)0x0083B33C;
+	Vector<_GcTriggerBox>* pGcCollisionPhysicsGroup__sLockedOutTriggerBoxes = (Vector<_GcTriggerBox>*)0x00839030;
 #elif GAME_EDITION == ALPHA
-bool* GcDebugOptions__sWireframe = (bool*)0x00610124;
-bool* gCollisionBoxes = (bool*)0x0061012C;
-// TODO: pScRenderer__DrawLines
+	bool* GcDebugOptions__sWireframe = (bool*)0x610124;
+	bool* gCollisionBoxes = (bool*)0x61012C;
+	//ScTriggerManager__ProcessTriggers pScTriggerManager__ProcessTriggers = (ScTriggerManager__ProcessTriggers)0x00491410;
+	ScRenderer__DrawLines pScRenderer__DrawLines = (ScRenderer__DrawLines)0x004CDCF0;
+	GcArea__Render pGcArea__Render = (GcArea__Render)0x004ABCB0;
+	GcBoundingPoly__Render pGcBoundingPoly__Render = (GcBoundingPoly__Render)0x004298A0;
+	Vector<_GcTriggerPlaneStruct>* pGcCollisionPhysicsGroup__sTriggerPlanes = (Vector<_GcTriggerPlaneStruct>*)0x0069BD3C;
+	Vector<_GcTriggerPlaneStruct>* pGcCollisionPhysicsGroup__sLockedOutTriggerPlanes = (Vector<_GcTriggerPlaneStruct>*)0x0069BA3C;
+	Vector<_GcTriggerBox>* pGcCollisionPhysicsGroup__sTriggerBoxes = (Vector<_GcTriggerBox>*)0x0069BE20;
+	Vector<_GcTriggerBox>* pGcCollisionPhysicsGroup__sLockedOutTriggerBoxes = (Vector<_GcTriggerBox>*)0x0069B9B4;
 #endif
 
 void DebugPrepPoint(ScPoint3d* points, Vector3 point, float size) {

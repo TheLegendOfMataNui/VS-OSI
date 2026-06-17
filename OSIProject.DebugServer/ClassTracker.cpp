@@ -56,9 +56,13 @@ public:
 typedef DWORD(__cdecl *SrHashString)(const LOMNHook::Native::_ScBaseString*);
 
 #if GAME_EDITION == BETA
-unsigned char* IsTypeInfoMapInitialized = (unsigned char*)0x007B5070;
-ScIdentifierMap<ScTypeInfo>* TypeInfoMap = (ScIdentifierMap<ScTypeInfo>*)0x007B5074;
-SrHashString pSrHashString = (SrHashString)0x004F6AF0;
+	unsigned char* IsTypeInfoMapInitialized = (unsigned char*)0x007B5070;
+	ScIdentifierMap<ScTypeInfo>* TypeInfoMap = (ScIdentifierMap<ScTypeInfo>*)0x007B5074;
+	SrHashString pSrHashString = (SrHashString)0x004F6AF0;
+#elif GAME_EDITION == ALPHA
+	unsigned char* IsTypeInfoMapInitialized = (unsigned char*)0x0064C550;
+	ScIdentifierMap<ScTypeInfo>* TypeInfoMap = (ScIdentifierMap<ScTypeInfo>*)0x0064C554;
+	SrHashString pSrHashString = (SrHashString)0x004A49F0;
 #endif
 /*SrHashString tSrHashString;
 std::map<DWORD, const char*> HashedStrings;
