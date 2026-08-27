@@ -101,7 +101,7 @@ struct CodeWarriorFunctionPointer {
 	DWORD pVtblOffsetOrStaticAddress;
 };
 
-#if GAME_EDITION == BETA
+#if GAME_EDITION == BETA or GAME_EDITION == REBUILT
 	ScOSISystem** ScGlobalOSISystem__theOSISystem = (void**)0x0074D644;
 	ScOSIVirtualMachine** GcGame__sVM = (ScOSIVirtualMachine**)0x0083877C;
 	ScOSISystem__RegisterFunction pScOSISystem__RegisterFunction = (ScOSISystem__RegisterFunction)0x005FAB30;

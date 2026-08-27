@@ -161,7 +161,7 @@ bool DrawTriggerBoxes = false;
 bool* gTriggerPlanes = &DrawTriggerPlanes;
 bool* gTriggerBoxes = &DrawTriggerBoxes;
 
-#if GAME_EDITION == BETA
+#if GAME_EDITION == BETA or GAME_EDITION == REBUILT
 	bool* GcDebugOptions__sWireframe = (bool*)0x705CA8;
 	bool* gCollisionBoxes = (bool*)0x705CAC;
 	//ScTriggerManager__ProcessTriggers pScTriggerManager__ProcessTriggers = (ScTriggerManager__ProcessTriggers)0x004C2BF0;

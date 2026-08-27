@@ -55,7 +55,7 @@ public:
 
 typedef DWORD(__cdecl *SrHashString)(const LOMNHook::Native::_ScBaseString*);
 
-#if GAME_EDITION == BETA
+#if GAME_EDITION == BETA or GAME_EDITION == REBUILT
 	unsigned char* IsTypeInfoMapInitialized = (unsigned char*)0x007B5070;
 	ScIdentifierMap<ScTypeInfo>* TypeInfoMap = (ScIdentifierMap<ScTypeInfo>*)0x007B5074;
 	SrHashString pSrHashString = (SrHashString)0x004F6AF0;
