@@ -262,20 +262,20 @@ void DebugDraw() {
 
 	// Trigger planes
 	if (DrawTriggerPlanes) {
-		for (int i = 0; i < pGcCollisionPhysicsGroup__sTriggerPlanes->Count; i++) {
+		for (unsigned int i = 0; i < pGcCollisionPhysicsGroup__sTriggerPlanes->Count; i++) {
 			DebugDrawTriggerPlane(&pGcCollisionPhysicsGroup__sTriggerPlanes->Data[i], Vector4(0.0f, 1.0f, 0.0f, 1.0f));
 		}
-		for (int i = 0; i < pGcCollisionPhysicsGroup__sLockedOutTriggerPlanes->Count; i++) {
+		for (unsigned int i = 0; i < pGcCollisionPhysicsGroup__sLockedOutTriggerPlanes->Count; i++) {
 			DebugDrawTriggerPlane(&pGcCollisionPhysicsGroup__sLockedOutTriggerPlanes->Data[i], Vector4(1.0f, 0.0f, 0.0f, 1.0f));
 		}
 	}
 
 	// Trigger Boxes
 	if (DrawTriggerBoxes) {
-		for (int i = 0; i < pGcCollisionPhysicsGroup__sTriggerBoxes->Count; i++) {
+		for (unsigned int i = 0; i < pGcCollisionPhysicsGroup__sTriggerBoxes->Count; i++) {
 			DebugDrawTriggerBox(&pGcCollisionPhysicsGroup__sTriggerBoxes->Data[i], Vector4(0.0f, 0.0f, 1.0f, 1.0f));
 		}
-		for (int i = 0; i < pGcCollisionPhysicsGroup__sLockedOutTriggerPlanes->Count; i++) {
+		for (unsigned int i = 0; i < pGcCollisionPhysicsGroup__sLockedOutTriggerPlanes->Count; i++) {
 			DebugDrawTriggerBox(&pGcCollisionPhysicsGroup__sLockedOutTriggerBoxes->Data[i], Vector4(1.0f, 0.0f, 0.0f, 1.0f));
 		}
 	}

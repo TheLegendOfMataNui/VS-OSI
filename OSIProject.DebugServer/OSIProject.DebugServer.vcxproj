@@ -181,19 +181,19 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)..\LOMNHook\minhook\include;$(SolutionDir)..\LOMNHook\LOMNHook\include;D:\Program Files (x86)\Microsoft DirectX SDK (August 2007)\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\..\LOMN-Beta-Legacy\build;$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
-    <OutDir>..\..\LOMN-Beta-Legacy\build\mods</OutDir>
+    <LibraryPath>$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <OutDir>..\..\LOMN-Beta-Legacy\build\mods\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Rebuilt Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)..\LOMNHook\minhook\include;$(SolutionDir)..\LOMNHook\LOMNHook\include;D:\Program Files (x86)\Microsoft DirectX SDK (August 2007)\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\..\LOMN-Rebuilt\build;$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
-    <OutDir>..\..\LOMN-Rebuilt\build\mods</OutDir>
+    <LibraryPath>$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <OutDir>..\..\LOMN-Rebuilt\build\mods\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alpha Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)..\LOMNHook\minhook\include;$(SolutionDir)..\LOMNHook\LOMNHook\include;D:\Program Files (x86)\Microsoft DirectX SDK (August 2007)\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\..\LOMN-Alpha\build;$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
     <OutDir>..\..\LOMN-Alpha\build\mods\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Debug|x64'">
@@ -214,21 +214,21 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)..\LOMNHook\minhook\include;$(SolutionDir)..\LOMNHook\LOMNHook\include;D:\Program Files (x86)\Microsoft DirectX SDK (August 2007)\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\LOMNHook\bin\$(Configuration);$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)..\LOMNHook\bin\$(Configuration)\mods\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Rebuilt Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)..\LOMNHook\minhook\include;$(SolutionDir)..\LOMNHook\LOMNHook\include;D:\Program Files (x86)\Microsoft DirectX SDK (August 2007)\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\LOMNHook\bin\$(Configuration);$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)..\LOMNHook\bin\$(Configuration)\mods\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alpha Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)..\LOMNHook\minhook\include;$(SolutionDir)..\LOMNHook\LOMNHook\include;D:\Program Files (x86)\Microsoft DirectX SDK (August 2007)\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\LOMNHook\bin\$(Configuration);$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)..\LOMNHook\lib\$(Configuration);$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)..\LOMNHook\bin\$(Configuration)\mods\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Beta Release|x64'">

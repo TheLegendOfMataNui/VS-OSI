@@ -101,7 +101,7 @@ struct ClassMetadata {
 	ScTypeInfo* NativeTypeInfo;
 	std::vector<ClassComponentMetadata> Components;
 	size_t OffsetOfComponent(ClassMetadata* componentClass) {
-		for (int i = 0; i < Components.size(); i++)
+		for (unsigned int i = 0; i < Components.size(); i++)
 			if (Components[i].ComponentClass == componentClass)
 				return Components[i].Offset;
 		return 0xFFFFFFFFUL;
